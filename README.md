@@ -2,6 +2,8 @@
 
 A browser-native AI tool that analyses any website and automatically
 generates visual mocks of its core pages.
+
+
 Live Demo : https://url-mock-generator.vercel.app/
 
 ## How to Create a Mock
