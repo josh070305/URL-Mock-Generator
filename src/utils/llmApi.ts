@@ -1,11 +1,118 @@
-import type { CrawlResult, MockPage } from '../types';
+import type { PageData, MockPage, MockResult, CrawlResult } from '../types';
+import { fetchPage, discoverCorePages } from './fetcher';
+import { extractPageStructure } from './extractor';
 
-type Provider = 'gemini' | 'anthropic' | 'openrouter' | 'groq';
+function getPrompt(pageData: PageData): string {
+  return `You are a UI mock generator. I have CRAWLED this real webpage and extracted its actual content. Generate a mock based ONLY on this real extracted data.
 
-function getProvider(): Provider {
-  const p = (import.meta.env.VITE_LLM_PROVIDER || 'gemini').toLowerCase();
-  if (p === 'anthropic' || p === 'openrouter' || p === 'groq') return p;
-  return 'gemini';
+REAL CRAWLED DATA:
+URL: ${pageData.url}
+Title: ${pageData.title}
+Description: ${pageData.description}
+Hero Headline: ${pageData.heroText}
+Hero Subtext: ${pageData.heroSubtext}
+Nav Items: ${pageData.navItems.map(n => n.label).join(', ')}
+Sections Found: ${pageData.sections.map(s => s.heading + ': ' + s.content.substring(0, 100)).join(' | ')}
+Footer Links: ${pageData.footerLinks.join(', ')}
+Real Brand Color: ${pageData.colors.primary}
+Background Color: ${pageData.colors.background}
+Site Type: ${pageData.siteType}
+
+Generate a mock using ONLY the real data above.
+Return ONLY valid JSON, no markdown, no backticks:
+
+{
+  "mockTitle": "use real title from data",
+  "mockDescription": "use real description from data",
+  "navbar": {
+    "logo": "brand name from title",
+    "links": ["use real nav items from data"]
+  },
+  "hero": {
+    "headline": "use real heroText from data",
+    "subheadline": "use real heroSubtext from data",
+    "ctaText": "primary action button text",
+    "ctaSecondary": "secondary action button text"
+  },
+  "sections": [
+    {
+      "title": "use real section headings from data",
+      "description": "use real section content from data",
+      "type": "features|content|cta"
+    }
+  ],
+  "footer": {
+    "tagline": "brand tagline",
+    "links": ["use real footer links from data"]
+  },
+  "colorScheme": {
+    "primary": "${pageData.colors.primary}",
+    "background": "${pageData.colors.background}",
+    "text": "${pageData.colors.text}"
+  }
+}`;
+}
+
+export async function generatePageMock(pageData: PageData): Promise<MockResult> {
+  try {
+    const key = import.meta.env.VITE_GROQ_KEY;
+    if (!key) throw new Error('Missing VITE_GROQ_KEY — set it in your .env file.');
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'user',
+            content: getPrompt(pageData),
+          },
+        ],
+        max_tokens: 2000,
+        temperature: 0.3,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      throw new Error(`Groq API error: ${response.status} ${errorBody}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices[0].message.content;
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch {
+    return {
+      mockTitle: pageData.title,
+      mockDescription: pageData.description || pageData.heroSubtext,
+      navbar: {
+        logo: new URL(pageData.url).hostname.replace('www.', ''),
+        links: pageData.navItems.slice(0, 4).map(n => n.label),
+      },
+      hero: {
+        headline: pageData.heroText,
+        subheadline: pageData.heroSubtext,
+        ctaText: 'Get Started',
+        ctaSecondary: 'Learn More',
+      },
+      sections: pageData.sections.slice(0, 3).map((s) => ({
+        title: s.heading,
+        description: s.content,
+        type: s.type,
+      })),
+      footer: {
+        tagline: pageData.title,
+        links: pageData.footerLinks.slice(0, 4),
+      },
+      colorScheme: pageData.colors,
+      images: pageData.images,
+    };
+  }
 }
 
 function buildPrompt(url: string, hostname: string): string {
@@ -92,88 +199,27 @@ IMPORTANT:
 - Return ONLY the JSON, nothing else`;
 }
 
-async function callAnthropic(prompt: string): Promise<string> {
-  const key = import.meta.env.VITE_ANTHROPIC_KEY;
-  if (!key) throw new Error('Missing VITE_ANTHROPIC_KEY — set it in your .env file.');
+async function callGroq(prompt: string): Promise<string> {
+  const key = import.meta.env.VITE_GROQ_KEY;
+  if (!key) throw new Error('Missing VITE_GROQ_KEY — set it in your .env file.');
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
+      Authorization: `Bearer ${key}`,
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
+      model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => '');
-    throw new Error(`Claude API error: ${response.status} ${errorBody}`);
-  }
-
-  const data = await response.json();
-  return data.content[0].text;
-}
-
-async function callGemini(prompt: string): Promise<string> {
-  const key = import.meta.env.VITE_GEMINI_KEY;
-  if (!key) throw new Error('Missing VITE_GEMINI_KEY — get a free key at https://aistudio.google.com/apikey');
-
-  const model = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        maxOutputTokens: 4096,
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => '');
-    throw new Error(`Gemini API error: ${response.status} ${errorBody}`);
-  }
-
-  const data = await response.json();
-  return data.candidates[0].content.parts[0].text;
-}
-
-async function callOpenAICompatible(
-  baseUrl: string,
-  apiKey: string,
-  authHeader: string,
-  model: string,
-  prompt: string,
-): Promise<string> {
-  if (!apiKey) throw new Error('Missing API key — set the provider key in your .env file.');
-
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `${authHeader} ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
       max_tokens: 4096,
-      response_format: { type: 'json_object' },
-      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
     }),
   });
 
   if (!response.ok) {
     const errorBody = await response.text().catch(() => '');
-    throw new Error(`LLM API error: ${response.status} ${errorBody}`);
+    throw new Error(`Groq API error: ${response.status} ${errorBody}`);
   }
 
   const data = await response.json();
@@ -190,39 +236,35 @@ export async function crawlAndGenerateMocks(url: string): Promise<{
   mockedPages: MockPage[];
 }> {
   const hostname = new URL(url).hostname;
-  const prompt = buildPrompt(url, hostname);
-  const provider = getProvider();
 
-  let raw: string;
-
-  switch (provider) {
-    case 'anthropic':
-      raw = await callAnthropic(prompt);
-      break;
-    case 'gemini':
-      raw = await callGemini(prompt);
-      break;
-    case 'openrouter':
-      raw = await callOpenAICompatible(
-        'https://openrouter.ai/api/v1',
-        import.meta.env.VITE_OPENROUTER_KEY,
-        'Bearer',
-        import.meta.env.VITE_MODEL || 'qwen/qwen3-32b:free',
-        prompt,
-      );
-      break;
-    case 'groq':
-      raw = await callOpenAICompatible(
-        'https://api.groq.com/openai/v1',
-        import.meta.env.VITE_GROQ_KEY,
-        'Bearer',
-        import.meta.env.VITE_MODEL || 'llama-3.3-70b-versatile',
-        prompt,
-      );
-      break;
-    default:
-      raw = await callGemini(prompt);
+  const html = await fetchPage(url);
+  if (!html) {
+    const prompt = buildPrompt(url, hostname);
+    const raw = await callGroq(prompt);
+    return parseMock(raw);
   }
 
-  return parseMock(raw);
+  const pages = discoverCorePages(html, url);
+  const mockedPages: MockPage[] = [];
+
+  for (const pageUrl of pages) {
+    const pageHtml = await fetchPage(pageUrl);
+    if (!pageHtml) continue;
+    const pageData = extractPageStructure(pageHtml, pageUrl);
+    const mock = await generatePageMock(pageData);
+    mockedPages.push({
+      url: pageUrl,
+      title: pageData.title,
+      mock,
+    });
+  }
+
+  return {
+    crawlResult: {
+      baseUrl: url,
+      totalPages: mockedPages.length,
+      pages: mockedPages.map((p) => ({ url: p.url, title: p.title })),
+    },
+    mockedPages,
+  };
 }

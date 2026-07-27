@@ -72,11 +72,14 @@ export function MockDisplay({
 }
 
 function BrowserMock({ result, url }: { result: MockResult; url: string }) {
-  const { navbar, hero, sections, footer, colorScheme } = result;
+  const { navbar, hero, sections, footer, colorScheme, images } = result;
   const primary = colorScheme?.primary || '#6366f1';
+  const background = colorScheme?.background || '#ffffff';
+  const text = colorScheme?.text || '#000000';
+  const darkerPrimary = primary + 'cc';
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#1e1e2e] bg-[#13131f] shadow-xl">
+    <div className="overflow-hidden rounded-3xl border border-[#1e1e2e] shadow-xl">
       <div className="flex items-center gap-2 border-b border-[#1e1e2e] bg-[#0d0d14] px-4 py-3">
         <span className="h-3 w-3 rounded-full bg-[#ef4444]" />
         <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
@@ -86,7 +89,7 @@ function BrowserMock({ result, url }: { result: MockResult; url: string }) {
         </div>
       </div>
 
-      <div>
+      <div style={{ backgroundColor: background }}>
         <nav
           className="flex flex-wrap items-center justify-between gap-3 px-6 py-4"
           style={{ backgroundColor: primary }}
@@ -104,7 +107,7 @@ function BrowserMock({ result, url }: { result: MockResult; url: string }) {
         <section
           className="px-6 py-16 text-center"
           style={{
-            background: `linear-gradient(135deg, ${primary}, #0d0d14)`,
+            background: `linear-gradient(135deg, ${primary}, ${darkerPrimary})`,
           }}
         >
           <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
@@ -117,32 +120,53 @@ function BrowserMock({ result, url }: { result: MockResult; url: string }) {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <button
               className="rounded-xl px-6 py-3 font-semibold text-white transition-colors duration-200"
-              style={{ backgroundColor: '#0d0d14' }}
+              style={{ backgroundColor: primary }}
             >
               {hero.ctaText}
             </button>
             <button
               className="rounded-xl border px-6 py-3 font-semibold text-white transition-colors duration-200"
-              style={{ borderColor: '#ffffff' }}
+              style={{ borderColor: primary, color: primary }}
             >
               {hero.ctaSecondary}
             </button>
           </div>
         </section>
 
+        {images && images.length > 0 && (
+          <section className="px-6 py-8">
+            <div className="grid gap-4 sm:grid-cols-3">
+              {images.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt={`Crawled image ${i + 1}`}
+                  className="rounded-xl w-full object-cover"
+                  style={{ maxHeight: '300px' }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {sections.map((section, i) => (
-          <SectionBlock key={i} section={section} primary={primary} index={i} />
+          <SectionBlock key={i} section={section} primary={primary} background={background} text={text} index={i} />
         ))}
 
-        <footer className="bg-[#0d0d14] px-6 py-8">
+        <footer
+          className="px-6 py-8"
+          style={{ backgroundColor: background !== '#ffffff' ? background : '#0d0d14' }}
+        >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <span className="text-lg font-bold" style={{ color: primary }}>
                 {navbar.logo}
               </span>
-              <p className="mt-1 text-sm text-gray-400">{footer.tagline}</p>
+              <p className="mt-1 text-sm" style={{ color: text === '#000000' ? '#6b7280' : text + '99' }}>
+                {footer.tagline}
+              </p>
             </div>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+            <div className="flex flex-wrap gap-4 text-sm" style={{ color: text === '#000000' ? '#6b7280' : text + '99' }}>
               {footer.links.map((link) => (
                 <span key={link} className="hover:text-white cursor-default">
                   {link}
@@ -159,32 +183,39 @@ function BrowserMock({ result, url }: { result: MockResult; url: string }) {
 function SectionBlock({
   section,
   primary,
+  background,
+  text,
   index,
 }: {
   section: MockResult['sections'][number];
   primary: string;
+  background: string;
+  text: string;
   index: number;
 }) {
-  const bg = index % 2 === 0 ? '#13131f' : '#0d0d14';
+  const bg = index % 2 === 0 ? background : (background === '#ffffff' ? '#f3f4f6' : background);
+  const textColor = text === '#000000' ? '#1f2937' : text;
+  const mutedColor = text === '#000000' ? '#6b7280' : text + '99';
 
   if (section.type === 'features') {
     return (
       <section className="px-6 py-14" style={{ backgroundColor: bg }}>
-        <h3 className="text-center text-2xl font-bold text-white">{section.title}</h3>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-gray-400">
+        <h3 className="text-center text-2xl font-bold" style={{ color: textColor }}>{section.title}</h3>
+        <p className="mx-auto mt-2 max-w-2xl text-center" style={{ color: mutedColor }}>
           {section.description}
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {[0, 1, 2].map((c) => (
             <div
               key={c}
-              className="rounded-xl border border-[#1e1e2e] bg-[#0d0d14] p-6"
+              className="rounded-xl border p-6"
+              style={{ borderColor: primary + '33', backgroundColor: bg }}
             >
               <div className="text-2xl" style={{ color: primary }}>
                 ✦
               </div>
-              <h4 className="mt-3 font-semibold text-white">{section.title}</h4>
-              <p className="mt-2 text-sm text-gray-400">{section.description}</p>
+              <h4 className="mt-3 font-semibold" style={{ color: textColor }}>{section.title}</h4>
+              <p className="mt-2 text-sm" style={{ color: mutedColor }}>{section.description}</p>
             </div>
           ))}
         </div>
@@ -198,8 +229,8 @@ function SectionBlock({
         className="px-6 py-16 text-center"
         style={{ backgroundColor: bg }}
       >
-        <h3 className="text-2xl font-bold text-white">{section.title}</h3>
-        <p className="mx-auto mt-2 max-w-xl text-gray-400">{section.description}</p>
+        <h3 className="text-2xl font-bold" style={{ color: textColor }}>{section.title}</h3>
+        <p className="mx-auto mt-2 max-w-xl" style={{ color: mutedColor }}>{section.description}</p>
         <button
           className="mt-6 rounded-xl px-6 py-3 font-semibold text-white transition-colors duration-200"
           style={{ backgroundColor: primary }}
@@ -213,10 +244,10 @@ function SectionBlock({
   return (
     <section className="px-6 py-14" style={{ backgroundColor: bg }}>
       <div className="mx-auto max-w-3xl">
-        <h3 className="text-2xl font-bold text-white">{section.title}</h3>
-        <p className="mt-3 text-gray-400">{section.description}</p>
-        <div className="mt-6 flex h-40 items-center justify-center rounded-xl border border-dashed border-[#1e1e2e] bg-[#0d0d14] text-gray-600">
-          Image placeholder
+        <h3 className="text-2xl font-bold" style={{ color: textColor }}>{section.title}</h3>
+        <p className="mt-3" style={{ color: mutedColor }}>{section.description}</p>
+        <div className="mt-6 flex h-40 items-center justify-center rounded-xl border border-dashed" style={{ borderColor: primary + '33', backgroundColor: bg }}>
+          <span style={{ color: mutedColor }}>Image placeholder</span>
         </div>
       </div>
     </section>

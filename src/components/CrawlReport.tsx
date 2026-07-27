@@ -7,9 +7,9 @@ interface CrawlReportProps {
 
 const HOW_IT_WORKS = [
   'URL submitted by user',
-  'Claude AI analyses the website',
-  'Core pages identified automatically',
-  'Visual mock generated for each page',
+  'Vercel proxy fetches real HTML',
+  'Real content extracted: colors, nav, sections',
+  'Groq AI generates polished mock from real data',
 ];
 
 export function CrawlReport({ crawlResult, onClose }: CrawlReportProps) {
@@ -65,7 +65,7 @@ export function CrawlReport({ crawlResult, onClose }: CrawlReportProps) {
 
       <div className="border-t border-[#1e1e2e] px-6 py-4">
         <p className="text-xs text-gray-500">
-          Mocks are AI-generated based on Claude's knowledge of the website.
+          Mocks are generated from real crawled data by Groq AI.
         </p>
       </div>
     </aside>
