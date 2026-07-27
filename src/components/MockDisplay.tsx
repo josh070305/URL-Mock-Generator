@@ -22,7 +22,7 @@ export function MockDisplay({
   return (
     <div className="min-h-screen bg-[#0d0d14]">
       <header className="sticky top-0 z-10 border-b border-[#1e1e2e] bg-[#13131f]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4">
           <p className="text-sm text-gray-400">
             Mock of:{' '}
             <span className="font-semibold text-white">{crawlResult.baseUrl}</span>
@@ -43,7 +43,7 @@ export function MockDisplay({
           </div>
         </div>
 
-        <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 pb-3">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-3">
           {mockedPages.map((page, i) => (
             <button
               key={page.url + page.title}
@@ -60,26 +60,27 @@ export function MockDisplay({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        {active && <BrowserMock result={active.mock} url={active.url} />}
+      <main className="mx-auto max-w-7xl px-4 py-6">
+        {active && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <OriginalSite url={active.url} />
+            <GeneratedMock result={active.mock} url={active.url} />
+          </div>
+        )}
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          AI-generated mock · Pages identified: {crawlResult.totalPages}
+          Comparing original site vs AI-generated mock · Pages identified: {crawlResult.totalPages}
         </p>
       </main>
     </div>
   );
 }
 
-function BrowserMock({ result, url }: { result: MockResult; url: string }) {
-  const { navbar, hero, sections, footer, colorScheme, images } = result;
-  const primary = colorScheme?.primary || '#6366f1';
-  const background = colorScheme?.background || '#ffffff';
-  const text = colorScheme?.text || '#000000';
-  const darkerPrimary = primary + 'cc';
+function OriginalSite({ url }: { url: string }) {
+  const screenshotUrl = `https://api.screenshotone.com/take?url=${encodeURIComponent(url)}&access_key=free`;
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#1e1e2e] shadow-xl">
+    <div className="rounded-3xl border border-[#1e1e2e] bg-[#13131f] overflow-hidden">
       <div className="flex items-center gap-2 border-b border-[#1e1e2e] bg-[#0d0d14] px-4 py-3">
         <span className="h-3 w-3 rounded-full bg-[#ef4444]" />
         <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
@@ -87,6 +88,38 @@ function BrowserMock({ result, url }: { result: MockResult; url: string }) {
         <div className="ml-3 flex-1 truncate rounded-lg bg-[#13131f] px-3 py-1.5 text-xs text-gray-400">
           {url}
         </div>
+        <span className="shrink-0 text-xs font-medium text-indigo-400">Original Site</span>
+      </div>
+
+      <div className="relative" style={{ minHeight: '600px' }}>
+        <img
+          src={screenshotUrl}
+          alt={`Screenshot of ${url}`}
+          className="w-full h-auto max-h-[600px] object-contain"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  );
+}
+
+function GeneratedMock({ result, url }: { result: MockResult; url: string }) {
+  const { navbar, hero, sections, footer, colorScheme, images } = result;
+  const primary = colorScheme?.primary || '#6366f1';
+  const background = colorScheme?.background || '#ffffff';
+  const text = colorScheme?.text || '#000000';
+  const darkerPrimary = primary + 'cc';
+
+  return (
+    <div className="rounded-3xl border border-[#1e1e2e] bg-[#13131f] overflow-hidden shadow-xl">
+      <div className="flex items-center gap-2 border-b border-[#1e1e2e] bg-[#0d0d14] px-4 py-3">
+        <span className="h-3 w-3 rounded-full bg-[#ef4444]" />
+        <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
+        <span className="h-3 w-3 rounded-full bg-[#22c55e]" />
+        <div className="ml-3 flex-1 truncate rounded-lg bg-[#13131f] px-3 py-1.5 text-xs text-gray-400">
+          {url}
+        </div>
+        <span className="shrink-0 text-xs font-medium text-indigo-400">Generated Mock</span>
       </div>
 
       <div style={{ backgroundColor: background }}>
@@ -150,7 +183,14 @@ function BrowserMock({ result, url }: { result: MockResult; url: string }) {
         )}
 
         {sections.map((section, i) => (
-          <SectionBlock key={i} section={section} primary={primary} background={background} text={text} index={i} />
+          <SectionBlock
+            key={i}
+            section={section}
+            primary={primary}
+            background={background}
+            text={text}
+            index={i}
+          />
         ))}
 
         <footer
@@ -211,9 +251,7 @@ function SectionBlock({
               className="rounded-xl border p-6"
               style={{ borderColor: primary + '33', backgroundColor: bg }}
             >
-              <div className="text-2xl" style={{ color: primary }}>
-                ✦
-              </div>
+              <div className="text-2xl" style={{ color: primary }}>✦</div>
               <h4 className="mt-3 font-semibold" style={{ color: textColor }}>{section.title}</h4>
               <p className="mt-2 text-sm" style={{ color: mutedColor }}>{section.description}</p>
             </div>
@@ -225,10 +263,7 @@ function SectionBlock({
 
   if (section.type === 'cta') {
     return (
-      <section
-        className="px-6 py-16 text-center"
-        style={{ backgroundColor: bg }}
-      >
+      <section className="px-6 py-16 text-center" style={{ backgroundColor: bg }}>
         <h3 className="text-2xl font-bold" style={{ color: textColor }}>{section.title}</h3>
         <p className="mx-auto mt-2 max-w-xl" style={{ color: mutedColor }}>{section.description}</p>
         <button
