@@ -187,14 +187,30 @@ function projectFromBrowserCapture(sourceUrl: string, markup: string): MockProje
 
 async function readBrowserCapture(sourceUrl: string, suppliedEvidence: string) {
   if (suppliedEvidence.trim().startsWith("<")) return { markup: suppliedEvidence, origin: "supplied HTML" };
+
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 7000);
   try {
     const response = await fetch(sourceUrl, { credentials: "omit", signal: controller.signal });
     if (!response.ok) throw new Error("The site did not return a readable page.");
     return { markup: await response.text(), origin: "browser capture" };
+  } catch {
+    // Direct browser fetch blocked by CORS — try a public CORS proxy
   } finally {
     window.clearTimeout(timeout);
+  }
+
+  const proxyController = new AbortController();
+  const proxyTimeout = window.setTimeout(() => proxyController.abort(), 10000);
+  try {
+    const proxyUrl = `https://api.allorigins.app/get?url=${encodeURIComponent(sourceUrl)}`;
+    const response = await fetch(proxyUrl, { signal: proxyController.signal });
+    if (!response.ok) throw new Error("CORS proxy failed");
+    const data = await response.json();
+    if (!data.contents) throw new Error("No content from proxy");
+    return { markup: data.contents, origin: "cors proxy" };
+  } finally {
+    window.clearTimeout(proxyTimeout);
   }
 }
 
