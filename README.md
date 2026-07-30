@@ -1,82 +1,50 @@
-﻿# Omnisavant Doc Intelligence
+# Omnisavant URL Mock Generator
 
-Omnisavant Doc Intelligence is a static React + TypeScript + Tailwind CSS app that runs a four-stage AI document processing pipeline entirely in the browser. It calls the Claude API directly with `fetch`, so there is no backend, server, or database.
+A static React, TypeScript, and Tailwind CSS application that turns a public application URL into an inspectable mock set. It maps the core journey, identifies repeatable UI patterns, produces responsive static page previews, and exports a transparent mock specification.
 
-Live Demo: https://intern-a6r2n2kzz-josh070305s-projects.vercel.app
+## What it demonstrates
 
-## Features
+- A bounded crawl plan instead of a single generic screen
+- A route inventory with captured versus inferred confidence
+- Desktop and mobile previews for each core page
+- A component inventory, design-token extraction, and primary user flows
+- A JSON export containing the reconstruction evidence and assumptions
+- A GitHub scenario that shows how a complex application is represented across landing, repository, issues, pull requests, and profile surfaces
 
-- **Extract**: Convert pasted document text into structured JSON containing title, summary, key concepts, entities, and document structure.
-- **Crawl**: Build an interactive concept graph from extracted concepts and relationships.
-- **Agent**: Execute a ReAct-style reasoning loop over extracted content, displaying each reasoning step over time.
-- **Query**: Provide a chat interface that answers questions using only grounded document content.
+## Create a mock
 
-## Local Development
+1. Paste a public URL into the URL field.
+2. Select **Crawl & Mock**.
+3. Review the discovered core pages in the left-hand crawl plan.
+4. Switch between desktop and mobile previews, then inspect the fidelity report and component inventory.
+5. Add captured HTML, navigation labels, or notes when a site is authenticated or protected, then run again for a more evidence-led reconstruction.
+6. Select **Export mock report** to download the resulting JSON specification.
 
-1. Install dependencies:
+## Local development
 
 ```bash
 npm install
-```
-
-2. Create a local environment file:
-
-```bash
-cp .env.example .env
-```
-
-3. Add your Claude API key to `.env`:
-
-```env
-VITE_ANTHROPIC_KEY=your-key-here
-```
-
-4. Run the app:
-
-```bash
 npm run dev
 ```
 
-5. Build for production:
+Open the URL printed by Vite, normally `http://localhost:5173`.
+
+To create an optimised production build:
 
 ```bash
 npm run build
 ```
 
-## Environment Variables
+## Static browser constraints
 
-- `VITE_ANTHROPIC_KEY`: Your Claude API key for the Anthropic API.
+This is intentionally frontend-only: no backend, database, or automated browser service is required for the demo. Browsers block many cross-origin requests, authenticated pages, and bot-protected sites. For that reason the app is explicit about which routes are captured and which are inferred, and it provides an evidence field for user-supplied page detail.
 
-> Keep `.env` local and do not commit it. `.env` is included in `.gitignore`, so only `.env.example` should be tracked.
+A production crawler would move fetching and authenticated Playwright sessions to a server-side worker. The visible workspace, mock format, fidelity reporting, and page reconstruction flow are designed around that production architecture without hiding the constraints of a static demo.
+
+## API key note
+
+The current static demonstration does not require an API key. `.env` remains ignored by Git and should never be committed. Keep `.env.example` only as a safe template when adding optional AI analysis in the future.
 
 ## Deployment
 
-Deploy this project as a Vite app on Vercel:
-
-- Add `VITE_ANTHROPIC_KEY` under **Settings → Environment Variables**
-- The included `vercel.json` rewrites all routes to `/`, making the SPA deploy-ready
-
-## Why This Pipeline
-
-The pipeline is designed to make document AI predictable and inspectable:
-
-- Extraction normalizes raw text into stable structured fields
-- Crawling shows concept relationships visually
-- The agent stage exposes reasoning steps instead of hiding them
-- The query stage stays grounded in extracted document content
-
-## Project Structure
-
-- `src/` — React app source
-- `src/components/` — stage components
-- `README.md` — project documentation
-- `.env.example` — sample environment variables
-- `vite.config.ts` — Vite configuration
-- `tailwind.config.js` — Tailwind setup
-- `vercel.json` — SPA routing for Vercel
-
-## Notes
-
-- This app is intentionally frontend-only
-- No sensitive keys should be pushed to the repo
-- Use `.env.example` as the template for local setup
+Deploy as a Vite application on Vercel. The included `vercel.json` supports SPA routing.
