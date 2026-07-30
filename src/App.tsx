@@ -14,7 +14,9 @@ function App() {
   const [showReport, setShowReport] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [currentUrl, setCurrentUrl] = useState('');
-  const [progressStep, setProgressStep] = useState(0);
+  const [progressLabel, setProgressLabel] = useState('');
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const resetToInput = () => {
     setAppState('input');
@@ -24,27 +26,25 @@ function App() {
     setShowReport(false);
     setErrorMessage('');
     setCurrentUrl('');
-    setProgressStep(0);
+    setProgressLabel('');
+    setCurrentPageIndex(0);
+    setTotalPages(0);
   };
 
   const handleCrawl = async (submittedUrl: string) => {
     setAppState('crawling');
     setErrorMessage('');
     setCurrentUrl(submittedUrl);
-    setProgressStep(0);
+    setProgressLabel('Analysing URL...');
+    setCurrentPageIndex(0);
+    setTotalPages(0);
 
     try {
-      setProgressStep(1);
-      await new Promise(r => setTimeout(r, 800));
-      setProgressStep(2);
-      await new Promise(r => setTimeout(r, 800));
-      setProgressStep(3);
-      await new Promise(r => setTimeout(r, 800));
-      setProgressStep(4);
-
+      await new Promise(r => setTimeout(r, 600));
+      setProgressLabel('Fetching homepage...');
+      
       const result = await crawlAndGenerateMocks(submittedUrl);
       
-      setProgressStep(5);
       setCrawlResult(result.crawlResult);
       setMockedPages(result.mockedPages);
       setActiveMockIndex(0);
@@ -62,7 +62,14 @@ function App() {
   }
 
   if (appState === 'crawling') {
-    return <CrawlProgress url={currentUrl} currentStep={progressStep} />;
+    return (
+      <CrawlProgress
+        url={currentUrl}
+        label={progressLabel}
+        currentPage={currentPageIndex}
+        totalPages={totalPages}
+      />
+    );
   }
 
   if (appState === 'error') {

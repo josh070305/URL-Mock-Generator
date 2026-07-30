@@ -1,33 +1,3 @@
-export interface NavItem {
-  label: string;
-  url: string;
-}
-
-export interface Section {
-  heading: string;
-  content: string;
-  type: 'hero' | 'features' | 'content' | 'cta' | 'footer';
-}
-
-export interface PageData {
-  url: string;
-  title: string;
-  navItems: NavItem[];
-  heroText: string;
-  heroSubtext: string;
-  sections: Section[];
-  footerLinks: string[];
-  componentCount: number;
-  images: string[];
-  colors: {
-    primary: string;
-    background: string;
-    text: string;
-  };
-  siteType: string;
-  description: string;
-}
-
 export interface MockPage {
   url: string;
   title: string;
@@ -61,7 +31,7 @@ export interface MockResult {
     background: string;
     text: string;
   };
-  images?: string[];
+  images: string[];
 }
 
 export interface CrawlResult {
@@ -79,4 +49,34 @@ export interface ProgressStep {
   id: number;
   label: string;
   status: 'pending' | 'active' | 'done';
+}
+
+export interface NavItem {
+  label: string;
+  url: string;
+}
+
+export interface Section {
+  heading: string;
+  content: string;
+  type: 'hero' | 'features' | 'content' | 'cta' | 'footer';
+}
+
+export interface PageData {
+  url: string;
+  title: string;
+  navItems: NavItem[];
+  heroText: string;
+  heroSubtext: string;
+  sections: Section[];
+  footerLinks: string[];
+  componentCount: number;
+  images: string[];
+  colors: {
+    primary: string;
+    background: string;
+    text: string;
+  };
+  siteType: string;
+  description: string;
 }

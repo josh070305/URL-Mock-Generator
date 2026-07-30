@@ -159,7 +159,7 @@ function GeneratedMock({ result, url }: { result: MockResult; url: string }) {
             </button>
             <button
               className="rounded-xl border px-6 py-3 font-semibold text-white transition-colors duration-200"
-              style={{ borderColor: primary, color: primary }}
+              style={{ borderColor: '#ffffff' }}
             >
               {hero.ctaSecondary}
             </button>
