@@ -22,11 +22,18 @@ button, input, textarea { font: inherit; }
 /* Eyebrow label */
 .eyebrow {
   margin: 0;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.mock-eyebrow {
+  color: #6366f1;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.15em;
 }
 
 /* Preview stage - mock browser viewport */
@@ -150,7 +157,7 @@ button, input, textarea { font: inherit; }
   max-width: 520px;
   margin: 12px 0 16px;
   font-size: clamp(28px, 4vw, 48px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.02em;
   color: #0f172a;
@@ -160,9 +167,9 @@ button, input, textarea { font: inherit; }
   max-width: 500px;
   margin: 0 0 24px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.65;
-  color: #64748b;
+  color: #475569;
 }
 
 .mock-hero-grid {
@@ -186,7 +193,7 @@ button, input, textarea { font: inherit; }
 .mock-hero-grid > div:last-child { border-right: 0; }
 .mock-hero-grid span { font-size: 11px; font-weight: 800; color: #94a3b8; }
 .mock-hero-grid strong { font-size: 14px; font-weight: 700; color: #1e293b; }
-.mock-hero-grid small { font-size: 10px; line-height: 1.45; color: #94a3b8; }
+.mock-hero-grid small { font-size: 10px; line-height: 1.45; color: #64748b; font-weight: 600; }
 
 /* Content / repository */
 .mock-content { padding: 28px; }
@@ -229,8 +236,11 @@ button, input, textarea { font: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
+  color: #64748b;
 }
-.mock-file-list span { font-size: 12px; }
+.mock-file-list span { font-size: 12px; font-weight: 700; }
+.mock-file-list b { font-weight: 700; color: #0f172a; }
 .mock-repo-grid aside {
   padding: 16px;
   font-size: 11px;
@@ -264,7 +274,7 @@ button, input, textarea { font: inherit; }
 }
 .mock-listing-grid b, .mock-listing-grid small, .mock-listing-grid p { display: block; margin: 8px 12px 0; }
 .mock-listing-grid b { font-weight: 700; color: #0f172a; }
-.mock-listing-grid p { font-size: 10px; line-height: 1.45; color: #94a3b8; }
+.mock-listing-grid p { font-size: 10px; line-height: 1.45; color: #64748b; font-weight: 600; }
 .mock-image {
   display: grid;
   aspect-ratio: 1 / .78;
@@ -363,7 +373,8 @@ button, input, textarea { font: inherit; }
 .mock-article article > p {
   font-size: 13px;
   line-height: 1.65;
-  color: #64748b;
+  color: #475569;
+  font-weight: 600;
 }
 .mock-code {
   margin: 22px 0;
@@ -371,6 +382,7 @@ button, input, textarea { font: inherit; }
   border-radius: 8px;
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 11px;
+  font-weight: 600;
   line-height: 1.7;
   border: 1px solid #e2e8f0;
 }
