@@ -14,10 +14,10 @@ A static React, TypeScript, and Tailwind CSS application that turns a public app
 ## Create a mock
 
 1. Paste a public URL into the URL field.
-2. Select **Crawl & Mock**.
-3. Review the discovered core pages in the left-hand crawl plan.
+2. Select **Crawl & Mock**. The browser first tries to read the source page directly, without a server or proxy.
+3. Review the extracted core navigation pages in the left-hand crawl plan.
 4. Switch between desktop and mobile previews, then inspect the fidelity report and component inventory.
-5. Add captured HTML, navigation labels, or notes when a site is authenticated or protected, then run again for a more evidence-led reconstruction.
+5. When a site blocks browser access, paste captured HTML, navigation labels, or notes and run again for a source-led reconstruction.
 6. Select **Export mock report** to download the resulting JSON specification.
 
 ## Local development
@@ -37,7 +37,7 @@ npm run build
 
 ## Static browser constraints
 
-This is intentionally frontend-only: no backend, database, or automated browser service is required for the demo. Browsers block many cross-origin requests, authenticated pages, and bot-protected sites. For that reason the app is explicit about which routes are captured and which are inferred, and it provides an evidence field for user-supplied page detail.
+This is intentionally frontend-only: no backend, database, proxy, or automated browser service is used. URL analysis, HTML parsing, page planning, and report export run locally in the browser. Browsers block many cross-origin requests, authenticated pages, and bot-protected sites. For that reason the app is explicit about which routes are captured and which are inferred, and it provides an evidence field for user-supplied page detail.
 
 A production crawler would move fetching and authenticated Playwright sessions to a server-side worker. The visible workspace, mock format, fidelity reporting, and page reconstruction flow are designed around that production architecture without hiding the constraints of a static demo.
 

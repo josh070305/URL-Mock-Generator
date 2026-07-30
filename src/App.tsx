@@ -55,7 +55,7 @@ function makeProject(input: string): MockProject {
         ["issues", "Issues", "/openai/openai-cookbook/issues", "Work tracking and triage", "listing"],
         ["pulls", "Pull requests", "/openai/openai-cookbook/pulls", "Review and merge workflow", "listing"],
         ["profile", "Profile", "/octocat", "Identity, contributions, and activity", "dashboard"],
-      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: index < 2 ? "captured" : "inferred", confidence: 96 - index * 3 })),
+      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: "inferred", confidence: 96 - index * 3 })),
       components: ["Global navigation", "Repository header", "Tab bar", "File tree", "Issue row", "Context sidebar"],
       flows: ["Discover a repository", "Inspect source files", "Track an issue", "Review a pull request"],
       tokens: [
@@ -74,7 +74,7 @@ function makeProject(input: string): MockProject {
         ["product", "Product detail", "/products/featured", "Evaluation and conversion", "repository"],
         ["cart", "Bag", "/cart", "Review selected items", "dashboard"],
         ["checkout", "Checkout", "/checkout", "Address, payment, and confirmation", "article"],
-      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: index < 2 ? "captured" : "inferred", confidence: 94 - index * 3 })),
+      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: "inferred", confidence: 94 - index * 3 })),
       components: ["Header navigation", "Product card", "Filter rail", "Product gallery", "Cart summary", "Checkout form"],
       flows: ["Browse a collection", "Evaluate a product", "Add to basket", "Complete checkout"],
       tokens: [
@@ -92,7 +92,7 @@ function makeProject(input: string): MockProject {
         ["guide", "Getting started", "/docs/getting-started", "Core product orientation", "article"],
         ["reference", "API reference", "/docs/api", "Endpoint and parameter lookup", "repository"],
         ["search", "Search", "/search", "Retrieve relevant documentation", "listing"],
-      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: index === 0 ? "captured" : "inferred", confidence: 94 - index * 4 })),
+      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: "inferred", confidence: 94 - index * 4 })),
       components: ["Header navigation", "Search command", "Documentation sidebar", "Article body", "Code example", "On-page outline"],
       flows: ["Find an integration", "Read a guide", "Copy an API example", "Search references"],
       tokens: [
@@ -111,7 +111,7 @@ function makeProject(input: string): MockProject {
         ["reports", "Reports", "/app/reports", "Measure and analyse activity", "listing"],
         ["settings", "Settings", "/app/settings", "Account and workspace management", "article"],
         ["signin", "Sign in", "/login", "Authentication entry", "repository"],
-      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: index < 2 ? "captured" : "inferred", confidence: 93 - index * 3 })),
+      ].map(([id, name, path, purpose, layout], index) => ({ id, name, path, purpose, layout: layout as MockPage["layout"], status: "inferred", confidence: 93 - index * 3 })),
       components: ["Marketing navigation", "App sidebar", "Metric card", "Data table", "Primary action", "Settings form"],
       flows: ["Understand the product", "Enter workspace", "Review a report", "Manage account settings"],
       tokens: [
@@ -123,6 +123,81 @@ function makeProject(input: string): MockProject {
     },
   };
   return { ...presets[kind], sourceUrl, kind };
+}
+
+function layoutForPath(path: string): MockPage["layout"] {
+  const value = path.toLowerCase();
+  if (/(docs|guide|blog|help|learn|article)/.test(value)) return "article";
+  if (/(app|dashboard|account|profile|settings|cart)/.test(value)) return "dashboard";
+  if (/(repo|product|detail|api)/.test(value)) return "repository";
+  if (/(search|issues|pull|collection|pricing|news)/.test(value)) return "listing";
+  return "landing";
+}
+
+function projectFromBrowserCapture(sourceUrl: string, markup: string): MockProject {
+  const fallback = makeProject(sourceUrl);
+  const pageDocument = new DOMParser().parseFromString(markup, "text/html");
+  const title = pageDocument.title.trim() || fallback.name;
+  const heading = pageDocument.querySelector("h1")?.textContent?.trim();
+  const source = new URL(sourceUrl);
+  const seen = new Set<string>();
+  const linkedPages: MockPage[] = [];
+
+  Array.from(pageDocument.querySelectorAll<HTMLAnchorElement>("a[href]")).some((anchor) => {
+    const label = anchor.textContent?.replace(/\s+/g, " ").trim();
+    if (!label || label.length > 42) return false;
+    try {
+      const target = new URL(anchor.href, sourceUrl);
+      if (target.hostname !== source.hostname || target.hash || seen.has(target.pathname)) return false;
+      seen.add(target.pathname);
+      linkedPages.push({
+        id: `captured-${linkedPages.length + 1}`,
+        name: label,
+        path: target.pathname || "/",
+        purpose: "Discovered from the source page navigation.",
+        layout: layoutForPath(target.pathname),
+        status: "inferred",
+        confidence: 82,
+      });
+    } catch {
+      return false;
+    }
+    return linkedPages.length >= 5;
+  });
+
+  const components = [
+    ["nav", "Navigation"],
+    ["header", "Header"],
+    ["main", "Main content"],
+    ["button", "Action button"],
+    ["input, textarea", "Input control"],
+    ["img, picture, svg", "Visual media"],
+    ["footer", "Footer"],
+  ].filter(([selector]) => pageDocument.querySelector(selector)).map(([, label]) => label);
+
+  return {
+    ...fallback,
+    name: title.replace(/\s+[|\-]\s+.*$/, "") || fallback.name,
+    summary: heading || fallback.summary,
+    pages: [
+      { id: "captured-home", name: "Home", path: "/", purpose: "Source page parsed directly in the browser.", layout: "landing" as const, status: "captured" as const, confidence: 98 },
+      ...linkedPages.filter((page) => page.path !== "/"),
+    ].slice(0, 6),
+    components: components.length ? components : fallback.components,
+  };
+}
+
+async function readBrowserCapture(sourceUrl: string, suppliedEvidence: string) {
+  if (suppliedEvidence.trim().startsWith("<")) return { markup: suppliedEvidence, origin: "supplied HTML" };
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 7000);
+  try {
+    const response = await fetch(sourceUrl, { credentials: "omit", signal: controller.signal });
+    if (!response.ok) throw new Error("The site did not return a readable page.");
+    return { markup: await response.text(), origin: "browser capture" };
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 function Dot({ color }: { color: string }) {
@@ -212,16 +287,24 @@ export default function App() {
     setNotice("Discovering the public route hierarchy...");
     await new Promise((resolve) => window.setTimeout(resolve, 600));
     setRunState("analyzing");
-    setNotice("Analysing layout patterns, interaction surfaces, and visual tokens...");
+    setNotice("Trying a browser-only source capture, then analysing the page structure locally...");
     await new Promise((resolve) => window.setTimeout(resolve, 700));
     setRunState("generating");
     setNotice("Generating an inspectable static mock set...");
     await new Promise((resolve) => window.setTimeout(resolve, 600));
-    const nextProject = makeProject(nextUrl);
+    let nextProject = makeProject(nextUrl);
+    let captureOrigin = "route inference";
+    try {
+      const capture = await readBrowserCapture(nextUrl, evidence);
+      nextProject = projectFromBrowserCapture(nextUrl, capture.markup);
+      captureOrigin = capture.origin;
+    } catch {
+      // Static browsers cannot read every cross-origin URL. The fallback stays explicit.
+    }
     setProject(nextProject);
     setSelectedPage(nextProject.pages[0].id);
     setRunState("complete");
-    setNotice(evidence.trim() ? "Mocks generated with your supplied evidence and route inference." : "Mocks generated. Add captured HTML or notes to improve fidelity for protected sites.");
+    setNotice(captureOrigin === "route inference" ? "The site blocked browser capture. A transparent route plan was generated; paste page HTML for a source-led mock." : `Mock plan generated from ${captureOrigin}. Linked core pages are inferred from the captured navigation.`);
   }
 
   function loadGithub() {
@@ -257,7 +340,7 @@ export default function App() {
         <div className="mx-auto max-w-[1440px] px-5 py-7 lg:px-8">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">APPLICATION RECONSTRUCTION</p><h2 className="mt-1 text-2xl font-bold tracking-normal text-[#172033] sm:text-3xl">Turn a public URL into an inspectable mock set.</h2></div><button onClick={loadGithub} className="text-sm font-semibold text-[#325ad7] hover:text-[#1d3eaa]">Load GitHub scenario</button></div>
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]"><div className="flex min-w-0 items-center border border-[#cbd3df] bg-white p-1 shadow-sm focus-within:border-[#4f46e5] focus-within:ring-2 focus-within:ring-[#e0e7ff]"><span className="px-3 font-mono text-sm text-slate-400">URL</span><input value={url} onChange={(event) => setUrl(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void generate()} className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none" placeholder="https://github.com" /><button onClick={() => setUrl("")} className="px-3 text-xs text-slate-400 hover:text-slate-700">Clear</button></div><button onClick={() => void generate()} disabled={runState !== "idle" && runState !== "complete"} className="bg-[#172033] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#29364f] disabled:cursor-wait disabled:opacity-75">{runState === "idle" || runState === "complete" ? "Crawl & Mock" : "Working..."}</button></div>
-          <details className="mt-4"><summary className="cursor-pointer text-xs font-semibold text-slate-600">Add captured HTML or notes for higher-fidelity reconstruction</summary><textarea value={evidence} onChange={(event) => setEvidence(event.target.value)} className="mt-3 min-h-24 w-full border border-[#cbd3df] p-3 text-sm outline-none focus:border-[#4f46e5]" placeholder="Paste visible page content, navigation labels, screenshots notes, or a DOM snapshot. Nothing is uploaded unless you use an AI-enabled version of this tool." /></details>
+          <details className="mt-4"><summary className="cursor-pointer text-xs font-semibold text-slate-600">Paste page HTML or capture notes for protected sites</summary><textarea value={evidence} onChange={(event) => setEvidence(event.target.value)} className="mt-3 min-h-24 w-full border border-[#cbd3df] p-3 text-sm outline-none focus:border-[#4f46e5]" placeholder="Paste the page HTML, visible navigation labels, or capture notes. Analysis stays in this browser and is never uploaded." /></details>
         </div>
       </section>
 
