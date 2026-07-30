@@ -199,7 +199,8 @@ async function readBrowserCapture(sourceUrl: string, suppliedEvidence: string) {
 }
 
 function Dot({ color }: { color: string }) {
-  return <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color }} />;
+  const dotClass = color === "#f87171" ? "dot-red" : color === "#fbbf24" ? "dot-amber" : "dot-green";
+  return <span className={`inline-block h-3 w-3 rounded-full ${dotClass}`} style={{ backgroundColor: color }} />;
 }
 
 function BrowserMock({ page, project, device }: { page: MockPage; project: MockProject; device: Device }) {
@@ -322,34 +323,267 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f7fb] text-[#172033]">
-      <header className="border-b border-[#dfe3eb] bg-white">
+    <main className="min-h-screen app-shell text-[#e2e8f0]">
+      <header className="app-header border-b border-[#334159]">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-5 px-5 py-4 lg:px-8">
-          <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center bg-[#172033] text-sm font-bold text-white">O</span><div><h1 className="text-sm font-bold">Omnisavant</h1><p className="text-xs text-slate-500">URL Mock Generator</p></div></div>
-          <div className="hidden items-center gap-5 text-xs text-slate-500 md:flex"><span>Static analysis workspace</span><span className="h-4 w-px bg-slate-200" /><span className="font-mono text-[11px]">v1.0.0</span></div>
+          <div className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white">O</span>
+            <div>
+              <h1 className="text-sm font-bold text-white">Omnisavant</h1>
+              <p className="text-xs text-slate-400">URL Mock Generator</p>
+            </div>
+          </div>
+          <div className="hidden items-center gap-5 text-xs text-slate-400 md:flex">
+            <span className="text-slate-400">Static analysis workspace</span>
+            <span className="h-4 w-px bg-slate-600" />
+            <span className="font-mono text-[11px] text-slate-400">v1.0.0</span>
+          </div>
         </div>
       </header>
 
-      <section className="border-b border-[#dfe3eb] bg-white">
+      <section className="border-b border-[#334159] bg-[#1e293b]">
         <div className="mx-auto max-w-[1440px] px-5 py-7 lg:px-8">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">APPLICATION RECONSTRUCTION</p><h2 className="mt-1 text-2xl font-bold tracking-normal text-[#172033] sm:text-3xl">Turn a public URL into an inspectable mock set.</h2></div></div>
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]"><div className="flex min-w-0 items-center border border-[#cbd3df] bg-white p-1 shadow-sm focus-within:border-[#4f46e5] focus-within:ring-2 focus-within:ring-[#e0e7ff]"><span className="px-3 font-mono text-sm text-slate-400">URL</span><input value={url} onChange={(event) => setUrl(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void generate()} className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none" placeholder="https://github.com" /><button onClick={() => setUrl("")} className="px-3 text-xs text-slate-400 hover:text-slate-700">Clear</button></div><button onClick={() => void generate()} disabled={runState !== "idle" && runState !== "complete"} className="bg-[#172033] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#29364f] disabled:cursor-wait disabled:opacity-75">{runState === "idle" || runState === "complete" ? "Crawl & Mock" : "Working..."}</button></div>
-          <details className="mt-4"><summary className="cursor-pointer text-xs font-semibold text-slate-600">Paste page HTML or capture notes for protected sites</summary><textarea value={evidence} onChange={(event) => setEvidence(event.target.value)} className="mt-3 min-h-24 w-full border border-[#cbd3df] p-3 text-sm outline-none focus:border-[#4f46e5]" placeholder="Paste the page HTML, visible navigation labels, or capture notes. Analysis stays in this browser and is never uploaded." /></details>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="eyebrow">APPLICATION RECONSTRUCTION</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-normal text-white sm:text-3xl">
+                Turn a public URL into an inspectable mock set.
+              </h2>
+            </div>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="url-input-wrapper">
+              <span className="px-3 font-mono text-sm text-slate-400">URL</span>
+              <input
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && void generate()}
+                className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-slate-200 outline-none"
+                placeholder="https://github.com"
+              />
+              <button
+                onClick={() => setUrl("")}
+                className="px-3 text-xs text-slate-500 hover:text-slate-300"
+              >
+                Clear
+              </button>
+            </div>
+            <button
+              onClick={() => void generate()}
+              disabled={runState !== "idle" && runState !== "complete"}
+              className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:from-indigo-600 hover:to-purple-700 disabled:cursor-wait disabled:opacity-75"
+            >
+              {runState === "idle" || runState === "complete" ? "Crawl & Mock" : "Working..."}
+            </button>
+          </div>
+          <details className="mt-4">
+            <summary className="cursor-pointer text-xs font-semibold text-slate-400">
+              Paste page HTML or capture notes for protected sites
+            </summary>
+            <textarea
+              value={evidence}
+              onChange={(event) => setEvidence(event.target.value)}
+              className="mt-3 min-h-24 w-full rounded-xl border border-[#334159] bg-[#0f172a] p-3 text-sm text-slate-200 outline-none focus:border-[#4f46e5]"
+              placeholder="Paste the page HTML, visible navigation labels, or capture notes. Analysis stays in this browser and is never uploaded."
+            />
+          </details>
         </div>
       </section>
 
-      <section className="border-b border-[#dfe3eb] bg-[#fbfcfe]"><div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-x-3 gap-y-2 px-5 py-4 sm:grid-cols-4 lg:px-8">{stages.map((stage, index) => <div key={stage} className="flex items-center gap-2"><span className={`grid h-6 w-6 place-items-center rounded-full text-xs font-bold ${activeStep > index ? "bg-[#172033] text-white" : activeStep === index + 1 ? "border-2 border-[#4f46e5] text-[#4f46e5]" : "border border-[#cbd3df] text-slate-400"}`}>{activeStep > index ? "OK" : index + 1}</span><span className={`text-xs font-semibold ${activeStep >= index + 1 ? "text-[#172033]" : "text-slate-400"}`}>{stage}</span></div>)}</div></section>
+      <section className="border-b border-[#334159] bg-[#1e293b]">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-x-3 gap-y-2 px-5 py-4 sm:grid-cols-4 lg:px-8">
+          {stages.map((stage, index) => (
+            <div key={stage} className="flex items-center gap-2">
+              <span
+                className={`stage-pill ${
+                  activeStep > index
+                    ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
+                    : activeStep === index + 1
+                      ? "border-2 border-indigo-400 text-indigo-400"
+                      : "border border-[#334159] text-slate-500"
+                }`}
+              >
+                {activeStep > index ? "OK" : index + 1}
+              </span>
+              <span
+                className={`text-xs font-semibold ${
+                  activeStep >= index + 1 ? "text-white" : "text-slate-500"
+                }`}
+              >
+                {stage}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <div className="mx-auto max-w-[1440px] px-5 py-6 lg:px-8"><p className="mb-5 text-sm text-slate-600"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#14b87a]" />{notice}</p>
+      <div className="mx-auto max-w-[1440px] px-5 py-6 lg:px-8">
+        <p className="mb-5 text-sm text-slate-400">
+          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#10b981]" />
+          {notice}
+        </p>
         <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_282px]">
-          <aside className="border border-[#dfe3eb] bg-white"><div className="border-b border-[#dfe3eb] p-4"><p className="eyebrow">CRAWL PLAN</p><h3 className="mt-1 font-bold">Core pages</h3><p className="mt-1 text-xs leading-5 text-slate-500">A bounded route set selected for user-journey coverage.</p></div><div>{project ? project.pages.map((item) => <button key={item.id} onClick={() => setSelectedPage(item.id)} className={`block w-full border-b border-[#edf0f4] px-4 py-3 text-left last:border-b-0 ${page?.id === item.id ? "bg-[#f0f3ff]" : "hover:bg-[#f8fafc]"}`}><div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold">{item.name}</span><span className={`text-[10px] font-bold uppercase tracking-wide ${item.status === "captured" ? "text-[#07875a]" : "text-[#64748b]"}`}>{item.status}</span></div><p className="mt-1 truncate font-mono text-[11px] text-slate-500">{item.path}</p></button>) : <p className="px-4 py-3 text-sm text-slate-400">No project loaded. Paste a URL above to begin.</p>}</div><div className="p-4"><button onClick={exportReport} className="w-full border border-[#aeb8c8] py-2 text-sm font-semibold text-[#172033] hover:bg-slate-50">Export mock report</button></div></aside>
+          <aside className="app-card">
+            <div className="border-b border-[#334159] p-4">
+              <p className="eyebrow">CRAWL PLAN</p>
+              <h3 className="mt-1 font-bold text-white">Core pages</h3>
+              <p className="mt-1 text-xs leading-5 text-slate-400">
+                A bounded route set selected for user-journey coverage.
+              </p>
+            </div>
+            <div>
+              {project
+                ? project.pages.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelectedPage(item.id)}
+                      className={`block w-full border-b border-[#edf0f4] px-4 py-3 text-left last:border-b-0 ${
+                        page?.id === item.id ? "bg-[#f0f3ff]" : "hover:bg-[#f8fafc]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-semibold text-slate-800">{item.name}</span>
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wide ${
+                            item.status === "captured" ? "text-[#07875a]" : "text-[#64748b]"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                      <p className="mt-1 truncate font-mono text-[11px] text-slate-500">{item.path}</p>
+                    </button>
+                  ))
+                : <p className="px-4 py-3 text-sm text-slate-400">No project loaded. Paste a URL above to begin.</p>}
+            </div>
+            <div className="p-4">
+              <button
+                onClick={exportReport}
+                className="w-full rounded-xl border border-[#aeb8c8] py-2 text-sm font-semibold text-slate-200 hover:bg-[#f8fafc]"
+              >
+                Export mock report
+              </button>
+            </div>
+          </aside>
 
-          <section className="min-w-0 border border-[#dfe3eb] bg-white"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe3eb] px-4 py-3"><div><p className="eyebrow">STATIC PREVIEW</p><h3 className="mt-1 text-sm font-bold">{page?.name ?? "No preview"} <span className="font-mono text-xs font-normal text-slate-400">{page?.path ?? ""}</span></h3></div><div className="flex border border-[#cbd3df] p-0.5"><button onClick={() => setDevice("desktop")} className={`px-3 py-1.5 text-xs font-semibold ${device === "desktop" ? "bg-[#172033] text-white" : "text-slate-500"}`}>Desktop</button><button onClick={() => setDevice("mobile")} className={`px-3 py-1.5 text-xs font-semibold ${device === "mobile" ? "bg-[#172033] text-white" : "text-slate-500"}`}>Mobile</button></div></div><div className="preview-stage">{project && page ? <BrowserMock page={page} project={project} device={device} /> : <div className="flex items-center justify-center h-96 text-slate-400 text-sm">Paste a URL and click Crawl & Mock to see the preview.</div>}</div></section>
+          <section className="min-w-0 app-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#334159] px-4 py-3">
+              <div>
+                <p className="eyebrow">STATIC PREVIEW</p>
+                <h3 className="mt-1 text-sm font-bold text-white">
+                  {page?.name ?? "No preview"}{" "}
+                  <span className="font-mono text-xs font-normal text-slate-400">
+                    {page?.path ?? ""}
+                  </span>
+                </h3>
+              </div>
+              <div className="flex border border-[#334159] rounded-lg p-0.5">
+                <button
+                  onClick={() => setDevice("desktop")}
+                  className={`rounded-l-lg px-3 py-1.5 text-xs font-semibold ${
+                    device === "desktop"
+                      ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                      : "text-slate-400"
+                  }`}
+                >
+                  Desktop
+                </button>
+                <button
+                  onClick={() => setDevice("mobile")}
+                  className={`rounded-r-lg px-3 py-1.5 text-xs font-semibold ${
+                    device === "mobile"
+                      ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                      : "text-slate-400"
+                  }`}
+                >
+                  Mobile
+                </button>
+              </div>
+            </div>
+            <div className="preview-stage">
+              {project && page ? (
+                <BrowserMock page={page} project={project} device={device} />
+              ) : (
+                <div className="flex items-center justify-center h-96 text-slate-400 text-sm">
+                  Paste a URL and click Crawl & Mock to see the preview.
+                </div>
+              )}
+            </div>
+          </section>
 
-          <aside className="space-y-5">{project && <>
-            <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">FIDELITY REPORT</p><div className="mt-4 grid grid-cols-2 gap-4"><div><span className="block text-2xl font-bold">{project.pages.length}</span><span className="text-xs text-slate-500">Core pages</span></div><div><span className="block text-2xl font-bold">{confidence}%</span><span className="text-xs text-slate-500">Route confidence</span></div><div><span className="block text-2xl font-bold">{captured}</span><span className="text-xs text-slate-500">Captured</span></div><div><span className="block text-2xl font-bold">{evidence.trim() ? "Yes" : "No"}</span><span className="text-xs text-slate-500">Evidence</span></div></div><div className="mt-4 border-t border-[#edf0f4] pt-3"><p className="text-xs leading-5 text-slate-500">Protected pages and cross-origin content are marked as inference. Supply evidence to validate the details.</p></div></section>
-            <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">DESIGN TOKENS</p><div className="mt-3 space-y-2">{project.tokens.map((token) => <div key={token.label} className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="h-4 w-4 border border-black/10" style={{ backgroundColor: token.swatch }} /><span className="text-xs">{token.label}</span></div><code className="text-[10px] text-slate-500">{token.value}</code></div>)}</div></section>
-            <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">INVENTORY</p><div className="mt-3 flex flex-wrap gap-1.5">{project.components.map((component) => <span key={component} className="border border-[#dfe3eb] bg-[#fafbfc] px-2 py-1 text-[11px] text-slate-600">{component}</span>)}</div><p className="eyebrow mt-5">PRIMARY FLOWS</p><ol className="mt-2 space-y-2">{project.flows.map((flow, index) => <li className="flex gap-2 text-xs text-slate-600" key={flow}><span className="font-mono text-slate-400">0{index + 1}</span>{flow}</li>)}</ol></section></>}
+          <aside className="space-y-5">
+            {project && (
+              <>
+                <section className="app-card p-4">
+                  <p className="eyebrow">FIDELITY REPORT</p>
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="block text-2xl font-bold text-white">{project.pages.length}</span>
+                      <span className="text-xs text-slate-400">Core pages</span>
+                    </div>
+                    <div>
+                      <span className="block text-2xl font-bold text-white">{confidence}%</span>
+                      <span className="text-xs text-slate-400">Route confidence</span>
+                    </div>
+                    <div>
+                      <span className="block text-2xl font-bold text-white">{captured}</span>
+                      <span className="text-xs text-slate-400">Captured</span>
+                    </div>
+                    <div>
+                      <span className="block text-2xl font-bold text-white">
+                        {evidence.trim() ? "Yes" : "No"}
+                      </span>
+                      <span className="text-xs text-slate-400">Evidence</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 border-t border-[#edf0f4] pt-3">
+                    <p className="text-xs leading-5 text-slate-400">
+                      Protected pages and cross-origin content are marked as inference.
+                      Supply evidence to validate the details.
+                    </p>
+                  </div>
+                </section>
+                <section className="app-card p-4">
+                  <p className="eyebrow">DESIGN TOKENS</p>
+                  <div className="mt-3 space-y-2">
+                    {project.tokens.map((token) => (
+                      <div key={token.label} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="h-5 w-5 rounded border border-black/10"
+                            style={{ backgroundColor: token.swatch }}
+                          />
+                          <span className="text-xs text-slate-300">{token.label}</span>
+                        </div>
+                        <code className="text-[10px] text-slate-500">{token.value}</code>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+                <section className="app-card p-4">
+                  <p className="eyebrow">INVENTORY</p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {project.components.map((component) => (
+                      <span
+                        key={component}
+                        className="rounded-lg border border-[#334159] bg-[#0f172a] px-2 py-1 text-[11px] text-slate-300"
+                      >
+                        {component}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="eyebrow mt-5">PRIMARY FLOWS</p>
+                  <ol className="mt-2 space-y-2">
+                    {project.flows.map((flow, index) => (
+                      <li className="flex gap-2 text-xs text-slate-400" key={flow}>
+                        <span className="font-mono text-slate-500">0{index + 1}</span>
+                        {flow}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              </>
+            )}
           </aside>
         </div>
       </div>
