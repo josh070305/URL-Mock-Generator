@@ -325,47 +325,47 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen app-shell text-[#e2e8f0]">
-      <header className="app-header border-b border-[#334159]">
+    <main className="min-h-screen app-shell text-[#172033]">
+      <header className="app-header border-b border-[#e2e8f0]">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-5 px-5 py-4 lg:px-8">
           <div className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white">O</span>
             <div>
-              <h1 className="text-sm font-bold text-white">Omnisavant</h1>
-              <p className="text-xs text-slate-400">URL Mock Generator</p>
+              <h1 className="text-sm font-bold text-slate-900">Omnisavant</h1>
+              <p className="text-xs text-slate-500">URL Mock Generator</p>
             </div>
           </div>
-          <div className="hidden items-center gap-5 text-xs text-slate-400 md:flex">
-            <span className="text-slate-400">Static analysis workspace</span>
-            <span className="h-4 w-px bg-slate-600" />
-            <span className="font-mono text-[11px] text-slate-400">v1.0.0</span>
+          <div className="hidden items-center gap-5 text-xs text-slate-500 md:flex">
+            <span className="text-slate-500">Static analysis workspace</span>
+            <span className="h-4 w-px bg-slate-300" />
+            <span className="font-mono text-[11px] text-slate-500">v1.0.0</span>
           </div>
         </div>
       </header>
 
-      <section className="border-b border-[#334159] bg-[#1e293b]">
+      <section className="border-b border-[#e2e8f0] bg-[#f8fafc]">
         <div className="mx-auto max-w-[1440px] px-5 py-7 lg:px-8">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="eyebrow">APPLICATION RECONSTRUCTION</p>
-              <h2 className="mt-1 text-2xl font-bold tracking-normal text-white sm:text-3xl">
+              <h2 className="mt-1 text-2xl font-bold tracking-normal text-slate-900 sm:text-3xl">
                 Turn a public URL into an inspectable mock set.
               </h2>
             </div>
           </div>
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
             <div className="url-input-wrapper">
-              <span className="px-3 font-mono text-sm text-slate-400">URL</span>
+              <span className="px-3 font-mono text-sm text-slate-500">URL</span>
               <input
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
                 onKeyDown={(event) => event.key === "Enter" && void generate()}
-                className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-slate-200 outline-none"
+                className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-slate-700 outline-none"
                 placeholder="https://github.com"
               />
               <button
                 onClick={() => setUrl("")}
-                className="px-3 text-xs text-slate-500 hover:text-slate-300"
+                className="px-3 text-xs text-slate-500 hover:text-slate-700"
               >
                 Clear
               </button>
@@ -379,20 +379,20 @@ export default function App() {
             </button>
           </div>
           <details className="mt-4">
-            <summary className="cursor-pointer text-xs font-semibold text-slate-400">
+            <summary className="cursor-pointer text-xs font-semibold text-slate-500">
               Paste page HTML or capture notes for protected sites
             </summary>
             <textarea
               value={evidence}
               onChange={(event) => setEvidence(event.target.value)}
-              className="mt-3 min-h-24 w-full rounded-xl border border-[#334159] bg-[#0f172a] p-3 text-sm text-slate-200 outline-none focus:border-[#4f46e5]"
+              className="mt-3 min-h-24 w-full rounded-xl border border-[#cbd5e1] bg-[#f8fafc] p-3 text-sm text-slate-700 outline-none focus:border-[#4f46e5]"
               placeholder="Paste the page HTML, visible navigation labels, or capture notes. Analysis stays in this browser and is never uploaded."
             />
           </details>
         </div>
       </section>
 
-      <section className="border-b border-[#334159] bg-[#1e293b]">
+      <section className="border-b border-[#e2e8f0] bg-[#f8fafc]">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-x-3 gap-y-2 px-5 py-4 sm:grid-cols-4 lg:px-8">
           {stages.map((stage, index) => (
             <div key={stage} className="flex items-center gap-2">
@@ -401,15 +401,15 @@ export default function App() {
                   activeStep > index
                     ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
                     : activeStep === index + 1
-                      ? "border-2 border-indigo-400 text-indigo-400"
-                      : "border border-[#334159] text-slate-500"
+                      ? "border-2 border-indigo-500 text-indigo-500"
+                      : "border border-[#cbd5e1] text-slate-500"
                 }`}
               >
                 {activeStep > index ? "OK" : index + 1}
               </span>
               <span
                 className={`text-xs font-semibold ${
-                  activeStep >= index + 1 ? "text-white" : "text-slate-500"
+                  activeStep >= index + 1 ? "text-slate-900" : "text-slate-500"
                 }`}
               >
                 {stage}
@@ -420,16 +420,16 @@ export default function App() {
       </section>
 
       <div className="mx-auto max-w-[1440px] px-5 py-6 lg:px-8">
-        <p className="mb-5 text-sm text-slate-400">
+        <p className="mb-5 text-sm text-slate-500">
           <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#10b981]" />
           {notice}
         </p>
         <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_282px]">
           <aside className="app-card">
-            <div className="border-b border-[#334159] p-4">
+            <div className="border-b border-[#e2e8f0] p-4">
               <p className="eyebrow">CRAWL PLAN</p>
-              <h3 className="mt-1 font-bold text-white">Core pages</h3>
-              <p className="mt-1 text-xs leading-5 text-slate-400">
+              <h3 className="mt-1 font-bold text-slate-900">Core pages</h3>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
                 A bounded route set selected for user-journey coverage.
               </p>
             </div>
@@ -444,7 +444,7 @@ export default function App() {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-slate-200">{item.name}</span>
+                        <span className="text-sm font-semibold text-slate-700">{item.name}</span>
                         <span
                           className={`text-[10px] font-bold uppercase tracking-wide ${
                             item.status === "captured" ? "text-[#07875a]" : "text-[#64748b]"
@@ -456,12 +456,12 @@ export default function App() {
                       <p className="mt-1 truncate font-mono text-[11px] text-slate-500">{item.path}</p>
                     </button>
                   ))
-                : <p className="px-4 py-3 text-sm text-slate-400">No project loaded. Paste a URL above to begin.</p>}
+                : <p className="px-4 py-3 text-sm text-slate-500">No project loaded. Paste a URL above to begin.</p>}
             </div>
             <div className="p-4">
               <button
                 onClick={exportReport}
-                className="w-full rounded-xl border border-[#aeb8c8] py-2 text-sm font-semibold text-slate-200 hover:bg-[#f8fafc]"
+                className="w-full rounded-xl border border-[#cbd5e1] py-2 text-sm font-semibold text-slate-700 hover:bg-[#f1f5f9]"
               >
                 Export mock report
               </button>
@@ -469,23 +469,23 @@ export default function App() {
           </aside>
 
           <section className="min-w-0 app-card">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#334159] px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e2e8f0] px-4 py-3">
               <div>
                 <p className="eyebrow">STATIC PREVIEW</p>
-                <h3 className="mt-1 text-sm font-bold text-white">
+                <h3 className="mt-1 text-sm font-bold text-slate-900">
                   {page?.name ?? "No preview"}{" "}
-                  <span className="font-mono text-xs font-normal text-slate-400">
+                  <span className="font-mono text-xs font-normal text-slate-500">
                     {page?.path ?? ""}
                   </span>
                 </h3>
               </div>
-              <div className="flex border border-[#334159] rounded-lg p-0.5">
+              <div className="flex border border-[#cbd5e1] rounded-lg p-0.5">
                 <button
                   onClick={() => setDevice("desktop")}
                   className={`rounded-l-lg px-3 py-1.5 text-xs font-semibold ${
                     device === "desktop"
                       ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
-                      : "text-slate-400"
+                      : "text-slate-500"
                   }`}
                 >
                   Desktop
@@ -495,7 +495,7 @@ export default function App() {
                   className={`rounded-r-lg px-3 py-1.5 text-xs font-semibold ${
                     device === "mobile"
                       ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
-                      : "text-slate-400"
+                      : "text-slate-500"
                   }`}
                 >
                   Mobile
@@ -506,7 +506,7 @@ export default function App() {
               {project && page ? (
                 <BrowserMock page={page} project={project} device={device} />
               ) : (
-                <div className="flex items-center justify-center h-96 text-slate-400 text-sm">
+                <div className="flex items-center justify-center h-96 text-slate-500 text-sm">
                   Paste a URL and click Crawl & Mock to see the preview.
                 </div>
               )}
@@ -523,7 +523,7 @@ export default function App() {
                       <img
                         src={screenshotUrl}
                         alt={`Screenshot of ${project.sourceUrl}`}
-                        className="w-full rounded-lg border border-[#334159]"
+                        className="w-full rounded-lg border border-[#e2e8f0]"
                         style={{ maxHeight: "200px", objectFit: "cover" }}
                       />
                     </div>
@@ -534,26 +534,26 @@ export default function App() {
                   <p className="eyebrow">FIDELITY REPORT</p>
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
-                      <span className="block text-2xl font-bold text-white">{project.pages.length}</span>
-                      <span className="text-xs text-slate-400">Core pages</span>
+                      <span className="block text-2xl font-bold text-slate-900">{project.pages.length}</span>
+                      <span className="text-xs text-slate-500">Core pages</span>
                     </div>
                     <div>
-                      <span className="block text-2xl font-bold text-white">{confidence}%</span>
-                      <span className="text-xs text-slate-400">Route confidence</span>
+                      <span className="block text-2xl font-bold text-slate-900">{confidence}%</span>
+                      <span className="text-xs text-slate-500">Route confidence</span>
                     </div>
                     <div>
-                      <span className="block text-2xl font-bold text-white">{captured}</span>
-                      <span className="text-xs text-slate-400">Captured</span>
+                      <span className="block text-2xl font-bold text-slate-900">{captured}</span>
+                      <span className="text-xs text-slate-500">Captured</span>
                     </div>
                     <div>
-                      <span className="block text-2xl font-bold text-white">
+                      <span className="block text-2xl font-bold text-slate-900">
                         {evidence.trim() ? "Yes" : "No"}
                       </span>
-                      <span className="text-xs text-slate-400">Evidence</span>
+                      <span className="text-xs text-slate-500">Evidence</span>
                     </div>
                   </div>
                   <div className="mt-4 border-t border-[#edf0f4] pt-3">
-                    <p className="text-xs leading-5 text-slate-400">
+                    <p className="text-xs leading-5 text-slate-500">
                       Protected pages and cross-origin content are marked as inference.
                       Supply evidence to validate the details.
                     </p>
@@ -569,7 +569,7 @@ export default function App() {
                             className="h-5 w-5 rounded border border-black/10"
                             style={{ backgroundColor: token.swatch }}
                           />
-                          <span className="text-xs text-slate-300">{token.label}</span>
+                          <span className="text-xs text-slate-700">{token.label}</span>
                         </div>
                         <code className="text-[10px] text-slate-500">{token.value}</code>
                       </div>
@@ -582,7 +582,7 @@ export default function App() {
                     {project.components.map((component) => (
                       <span
                         key={component}
-                        className="rounded-lg border border-[#334159] bg-[#0f172a] px-2 py-1 text-[11px] text-slate-300"
+                        className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-2 py-1 text-[11px] text-slate-700"
                       >
                         {component}
                       </span>
@@ -591,8 +591,8 @@ export default function App() {
                   <p className="eyebrow mt-5">PRIMARY FLOWS</p>
                   <ol className="mt-2 space-y-2">
                     {project.flows.map((flow, index) => (
-                      <li className="flex gap-2 text-xs text-slate-400" key={flow}>
-                        <span className="font-mono text-slate-500">0{index + 1}</span>
+                      <li className="flex gap-2 text-xs text-slate-500" key={flow}>
+                        <span className="font-mono text-slate-400">0{index + 1}</span>
                         {flow}
                       </li>
                     ))}
