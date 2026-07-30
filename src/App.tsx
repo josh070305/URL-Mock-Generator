@@ -444,7 +444,7 @@ export default function App() {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-slate-800">{item.name}</span>
+                        <span className="text-sm font-semibold text-slate-200">{item.name}</span>
                         <span
                           className={`text-[10px] font-bold uppercase tracking-wide ${
                             item.status === "captured" ? "text-[#07875a]" : "text-[#64748b]"
