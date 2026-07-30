@@ -25,11 +25,9 @@ type MockProject = {
   tokens: { label: string; value: string; swatch: string }[];
 };
 
-const DEFAULT_URL = "https://github.com";
-
 function normaliseUrl(value: string) {
   const trimmed = value.trim();
-  if (!trimmed) return DEFAULT_URL;
+  if (!trimmed) return "";
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
@@ -266,23 +264,27 @@ function BrowserMock({ page, project, device }: { page: MockPage; project: MockP
 }
 
 export default function App() {
-  const [url, setUrl] = useState(DEFAULT_URL);
+  const [url, setUrl] = useState("");
   const [evidence, setEvidence] = useState("");
-  const [project, setProject] = useState<MockProject>(() => makeProject(DEFAULT_URL));
-  const [selectedPage, setSelectedPage] = useState("repository");
+  const [project, setProject] = useState<MockProject | null>(null);
+  const [selectedPage, setSelectedPage] = useState("");
   const [device, setDevice] = useState<Device>("desktop");
   const [runState, setRunState] = useState<RunState>("idle");
-  const [notice, setNotice] = useState("Ready to analyse a public application URL.");
+  const [notice, setNotice] = useState("Paste a public URL and click Crawl & Mock.");
 
-  const page = project.pages.find((item) => item.id === selectedPage) ?? project.pages[0];
-  const captured = project.pages.filter((item) => item.status === "captured").length;
-  const confidence = Math.round(project.pages.reduce((total, item) => total + item.confidence, 0) / project.pages.length);
+  const page = project?.pages.find((item) => item.id === selectedPage) ?? project?.pages[0];
+  const captured = project?.pages.filter((item) => item.status === "captured").length ?? 0;
+  const confidence = project ? Math.round(project.pages.reduce((total, item) => total + item.confidence, 0) / project.pages.length) : 0;
   const stages = ["Discover routes", "Analyse structure", "Generate mocks", "Verify fidelity"];
   const activeStep = runState === "discovering" ? 1 : runState === "analyzing" ? 2 : runState === "generating" ? 3 : runState === "complete" ? 4 : 0;
-  const report = useMemo(() => ({ source: project.sourceUrl, generatedAt: new Date().toISOString(), project, evidenceProvided: Boolean(evidence.trim()), limits: "Static browser mode: live cross-origin crawling may be blocked. The output combines URL analysis, optional evidence, and transparent route inference." }), [project, evidence]);
+  const report = useMemo(() => ({ source: project?.sourceUrl ?? "", generatedAt: new Date().toISOString(), project, evidenceProvided: Boolean(evidence.trim()), limits: "Static browser mode: live cross-origin crawling may be blocked. The output combines URL analysis, optional evidence, and transparent route inference." }), [project, evidence]);
 
   async function generate() {
     const nextUrl = normaliseUrl(url);
+    if (!nextUrl) {
+      setNotice("Please enter a URL first.");
+      return;
+    }
     setRunState("discovering");
     setNotice("Discovering the public route hierarchy...");
     await new Promise((resolve) => window.setTimeout(resolve, 600));
@@ -307,16 +309,8 @@ export default function App() {
     setNotice(captureOrigin === "route inference" ? "The site blocked browser capture. A transparent route plan was generated; paste page HTML for a source-led mock." : `Mock plan generated from ${captureOrigin}. Linked core pages are inferred from the captured navigation.`);
   }
 
-  function loadGithub() {
-    setUrl(DEFAULT_URL);
-    const nextProject = makeProject(DEFAULT_URL);
-    setProject(nextProject);
-    setSelectedPage("repository");
-    setRunState("complete");
-    setNotice("GitHub reference scenario loaded with five linked core pages.");
-  }
-
   function exportReport() {
+    if (!project) return;
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
     const downloadUrl = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -338,7 +332,7 @@ export default function App() {
 
       <section className="border-b border-[#dfe3eb] bg-white">
         <div className="mx-auto max-w-[1440px] px-5 py-7 lg:px-8">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">APPLICATION RECONSTRUCTION</p><h2 className="mt-1 text-2xl font-bold tracking-normal text-[#172033] sm:text-3xl">Turn a public URL into an inspectable mock set.</h2></div><button onClick={loadGithub} className="text-sm font-semibold text-[#325ad7] hover:text-[#1d3eaa]">Load GitHub scenario</button></div>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="eyebrow">APPLICATION RECONSTRUCTION</p><h2 className="mt-1 text-2xl font-bold tracking-normal text-[#172033] sm:text-3xl">Turn a public URL into an inspectable mock set.</h2></div></div>
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]"><div className="flex min-w-0 items-center border border-[#cbd3df] bg-white p-1 shadow-sm focus-within:border-[#4f46e5] focus-within:ring-2 focus-within:ring-[#e0e7ff]"><span className="px-3 font-mono text-sm text-slate-400">URL</span><input value={url} onChange={(event) => setUrl(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void generate()} className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none" placeholder="https://github.com" /><button onClick={() => setUrl("")} className="px-3 text-xs text-slate-400 hover:text-slate-700">Clear</button></div><button onClick={() => void generate()} disabled={runState !== "idle" && runState !== "complete"} className="bg-[#172033] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#29364f] disabled:cursor-wait disabled:opacity-75">{runState === "idle" || runState === "complete" ? "Crawl & Mock" : "Working..."}</button></div>
           <details className="mt-4"><summary className="cursor-pointer text-xs font-semibold text-slate-600">Paste page HTML or capture notes for protected sites</summary><textarea value={evidence} onChange={(event) => setEvidence(event.target.value)} className="mt-3 min-h-24 w-full border border-[#cbd3df] p-3 text-sm outline-none focus:border-[#4f46e5]" placeholder="Paste the page HTML, visible navigation labels, or capture notes. Analysis stays in this browser and is never uploaded." /></details>
         </div>
@@ -348,13 +342,15 @@ export default function App() {
 
       <div className="mx-auto max-w-[1440px] px-5 py-6 lg:px-8"><p className="mb-5 text-sm text-slate-600"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#14b87a]" />{notice}</p>
         <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_282px]">
-          <aside className="border border-[#dfe3eb] bg-white"><div className="border-b border-[#dfe3eb] p-4"><p className="eyebrow">CRAWL PLAN</p><h3 className="mt-1 font-bold">Core pages</h3><p className="mt-1 text-xs leading-5 text-slate-500">A bounded route set selected for user-journey coverage.</p></div><div>{project.pages.map((item) => <button key={item.id} onClick={() => setSelectedPage(item.id)} className={`block w-full border-b border-[#edf0f4] px-4 py-3 text-left last:border-b-0 ${page.id === item.id ? "bg-[#f0f3ff]" : "hover:bg-[#f8fafc]"}`}><div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold">{item.name}</span><span className={`text-[10px] font-bold uppercase tracking-wide ${item.status === "captured" ? "text-[#07875a]" : "text-[#64748b]"}`}>{item.status}</span></div><p className="mt-1 truncate font-mono text-[11px] text-slate-500">{item.path}</p></button>)}</div><div className="p-4"><button onClick={exportReport} className="w-full border border-[#aeb8c8] py-2 text-sm font-semibold text-[#172033] hover:bg-slate-50">Export mock report</button></div></aside>
+          <aside className="border border-[#dfe3eb] bg-white"><div className="border-b border-[#dfe3eb] p-4"><p className="eyebrow">CRAWL PLAN</p><h3 className="mt-1 font-bold">Core pages</h3><p className="mt-1 text-xs leading-5 text-slate-500">A bounded route set selected for user-journey coverage.</p></div><div>{project ? project.pages.map((item) => <button key={item.id} onClick={() => setSelectedPage(item.id)} className={`block w-full border-b border-[#edf0f4] px-4 py-3 text-left last:border-b-0 ${page?.id === item.id ? "bg-[#f0f3ff]" : "hover:bg-[#f8fafc]"}`}><div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold">{item.name}</span><span className={`text-[10px] font-bold uppercase tracking-wide ${item.status === "captured" ? "text-[#07875a]" : "text-[#64748b]"}`}>{item.status}</span></div><p className="mt-1 truncate font-mono text-[11px] text-slate-500">{item.path}</p></button>) : <p className="px-4 py-3 text-sm text-slate-400">No project loaded. Paste a URL above to begin.</p>}</div><div className="p-4"><button onClick={exportReport} className="w-full border border-[#aeb8c8] py-2 text-sm font-semibold text-[#172033] hover:bg-slate-50">Export mock report</button></div></aside>
 
-          <section className="min-w-0 border border-[#dfe3eb] bg-white"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe3eb] px-4 py-3"><div><p className="eyebrow">STATIC PREVIEW</p><h3 className="mt-1 text-sm font-bold">{page.name} <span className="font-mono text-xs font-normal text-slate-400">{page.path}</span></h3></div><div className="flex border border-[#cbd3df] p-0.5"><button onClick={() => setDevice("desktop")} className={`px-3 py-1.5 text-xs font-semibold ${device === "desktop" ? "bg-[#172033] text-white" : "text-slate-500"}`}>Desktop</button><button onClick={() => setDevice("mobile")} className={`px-3 py-1.5 text-xs font-semibold ${device === "mobile" ? "bg-[#172033] text-white" : "text-slate-500"}`}>Mobile</button></div></div><div className="preview-stage"><BrowserMock page={page} project={project} device={device} /></div></section>
+          <section className="min-w-0 border border-[#dfe3eb] bg-white"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe3eb] px-4 py-3"><div><p className="eyebrow">STATIC PREVIEW</p><h3 className="mt-1 text-sm font-bold">{page?.name ?? "No preview"} <span className="font-mono text-xs font-normal text-slate-400">{page?.path ?? ""}</span></h3></div><div className="flex border border-[#cbd3df] p-0.5"><button onClick={() => setDevice("desktop")} className={`px-3 py-1.5 text-xs font-semibold ${device === "desktop" ? "bg-[#172033] text-white" : "text-slate-500"}`}>Desktop</button><button onClick={() => setDevice("mobile")} className={`px-3 py-1.5 text-xs font-semibold ${device === "mobile" ? "bg-[#172033] text-white" : "text-slate-500"}`}>Mobile</button></div></div><div className="preview-stage">{project && page ? <BrowserMock page={page} project={project} device={device} /> : <div className="flex items-center justify-center h-96 text-slate-400 text-sm">Paste a URL and click Crawl & Mock to see the preview.</div>}</div></section>
 
-          <aside className="space-y-5"><section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">FIDELITY REPORT</p><div className="mt-4 grid grid-cols-2 gap-4"><div><span className="block text-2xl font-bold">{project.pages.length}</span><span className="text-xs text-slate-500">Core pages</span></div><div><span className="block text-2xl font-bold">{confidence}%</span><span className="text-xs text-slate-500">Route confidence</span></div><div><span className="block text-2xl font-bold">{captured}</span><span className="text-xs text-slate-500">Captured</span></div><div><span className="block text-2xl font-bold">{evidence.trim() ? "Yes" : "No"}</span><span className="text-xs text-slate-500">Evidence</span></div></div><div className="mt-4 border-t border-[#edf0f4] pt-3"><p className="text-xs leading-5 text-slate-500">Protected pages and cross-origin content are marked as inference. Supply evidence to validate the details.</p></div></section>
+          <aside className="space-y-5">{project && <>
+            <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">FIDELITY REPORT</p><div className="mt-4 grid grid-cols-2 gap-4"><div><span className="block text-2xl font-bold">{project.pages.length}</span><span className="text-xs text-slate-500">Core pages</span></div><div><span className="block text-2xl font-bold">{confidence}%</span><span className="text-xs text-slate-500">Route confidence</span></div><div><span className="block text-2xl font-bold">{captured}</span><span className="text-xs text-slate-500">Captured</span></div><div><span className="block text-2xl font-bold">{evidence.trim() ? "Yes" : "No"}</span><span className="text-xs text-slate-500">Evidence</span></div></div><div className="mt-4 border-t border-[#edf0f4] pt-3"><p className="text-xs leading-5 text-slate-500">Protected pages and cross-origin content are marked as inference. Supply evidence to validate the details.</p></div></section>
             <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">DESIGN TOKENS</p><div className="mt-3 space-y-2">{project.tokens.map((token) => <div key={token.label} className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="h-4 w-4 border border-black/10" style={{ backgroundColor: token.swatch }} /><span className="text-xs">{token.label}</span></div><code className="text-[10px] text-slate-500">{token.value}</code></div>)}</div></section>
-            <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">INVENTORY</p><div className="mt-3 flex flex-wrap gap-1.5">{project.components.map((component) => <span key={component} className="border border-[#dfe3eb] bg-[#fafbfc] px-2 py-1 text-[11px] text-slate-600">{component}</span>)}</div><p className="eyebrow mt-5">PRIMARY FLOWS</p><ol className="mt-2 space-y-2">{project.flows.map((flow, index) => <li className="flex gap-2 text-xs text-slate-600" key={flow}><span className="font-mono text-slate-400">0{index + 1}</span>{flow}</li>)}</ol></section></aside>
+            <section className="border border-[#dfe3eb] bg-white p-4"><p className="eyebrow">INVENTORY</p><div className="mt-3 flex flex-wrap gap-1.5">{project.components.map((component) => <span key={component} className="border border-[#dfe3eb] bg-[#fafbfc] px-2 py-1 text-[11px] text-slate-600">{component}</span>)}</div><p className="eyebrow mt-5">PRIMARY FLOWS</p><ol className="mt-2 space-y-2">{project.flows.map((flow, index) => <li className="flex gap-2 text-xs text-slate-600" key={flow}><span className="font-mono text-slate-400">0{index + 1}</span>{flow}</li>)}</ol></section></>}
+          </aside>
         </div>
       </div>
     </main>
