@@ -272,6 +272,7 @@ export default function App() {
   const [device, setDevice] = useState<Device>("desktop");
   const [runState, setRunState] = useState<RunState>("idle");
   const [notice, setNotice] = useState("Paste a public URL and click Crawl & Mock.");
+  const [screenshotUrl, setScreenshotUrl] = useState("");
 
   const page = project?.pages.find((item) => item.id === selectedPage) ?? project?.pages[0];
   const captured = project?.pages.filter((item) => item.status === "captured").length ?? 0;
@@ -286,6 +287,7 @@ export default function App() {
       setNotice("Please enter a URL first.");
       return;
     }
+    setScreenshotUrl(`https://api.screenshotone.com/take?url=${encodeURIComponent(nextUrl)}&access_key=free`);
     setRunState("discovering");
     setNotice("Discovering the public route hierarchy...");
     await new Promise((resolve) => window.setTimeout(resolve, 600));
@@ -514,6 +516,20 @@ export default function App() {
           <aside className="space-y-5">
             {project && (
               <>
+                {screenshotUrl && (
+                  <section className="app-card p-4">
+                    <p className="eyebrow">ORIGINAL SITE</p>
+                    <div className="mt-3">
+                      <img
+                        src={screenshotUrl}
+                        alt={`Screenshot of ${project.sourceUrl}`}
+                        className="w-full rounded-lg border border-[#334159]"
+                        style={{ maxHeight: "200px", objectFit: "cover" }}
+                      />
+                    </div>
+                    <p className="mt-2 text-[10px] text-slate-500 break-all">{project.sourceUrl}</p>
+                  </section>
+                )}
                 <section className="app-card p-4">
                   <p className="eyebrow">FIDELITY REPORT</p>
                   <div className="mt-4 grid grid-cols-2 gap-4">
