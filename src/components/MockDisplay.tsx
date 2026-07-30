@@ -190,6 +190,8 @@ function GeneratedMock({ result, url }: { result: MockResult; url: string }) {
             background={background}
             text={text}
             index={i}
+            allSections={sections}
+            url={url}
           />
         ))}
 
@@ -226,18 +228,23 @@ function SectionBlock({
   background,
   text,
   index,
+  allSections,
+  url,
 }: {
   section: MockResult['sections'][number];
   primary: string;
   background: string;
   text: string;
   index: number;
+  allSections: MockResult['sections'];
+  url: string;
 }) {
   const bg = index % 2 === 0 ? background : (background === '#ffffff' ? '#f3f4f6' : background);
   const textColor = text === '#000000' ? '#1f2937' : text;
   const mutedColor = text === '#000000' ? '#6b7280' : text + '99';
 
   if (section.type === 'features') {
+    const featureItems = allSections.slice(0, 3);
     return (
       <section className="px-6 py-14" style={{ backgroundColor: bg }}>
         <h3 className="text-center text-2xl font-bold" style={{ color: textColor }}>{section.title}</h3>
@@ -245,15 +252,15 @@ function SectionBlock({
           {section.description}
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          {[0, 1, 2].map((c) => (
+          {featureItems.map((s, i) => (
             <div
-              key={c}
+              key={i}
               className="rounded-xl border p-6"
               style={{ borderColor: primary + '33', backgroundColor: bg }}
             >
               <div className="text-2xl" style={{ color: primary }}>✦</div>
-              <h4 className="mt-3 font-semibold" style={{ color: textColor }}>{section.title}</h4>
-              <p className="mt-2 text-sm" style={{ color: mutedColor }}>{section.description}</p>
+              <h4 className="mt-3 font-semibold" style={{ color: textColor }}>{s.title}</h4>
+              <p className="mt-2 text-sm" style={{ color: mutedColor }}>{s.description}</p>
             </div>
           ))}
         </div>
@@ -281,8 +288,16 @@ function SectionBlock({
       <div className="mx-auto max-w-3xl">
         <h3 className="text-2xl font-bold" style={{ color: textColor }}>{section.title}</h3>
         <p className="mt-3" style={{ color: mutedColor }}>{section.description}</p>
-        <div className="mt-6 flex h-40 items-center justify-center rounded-xl border border-dashed" style={{ borderColor: primary + '33', backgroundColor: bg }}>
-          <span style={{ color: mutedColor }}>Image placeholder</span>
+        <div className="mt-6 flex items-center gap-4 rounded-xl border p-5" style={{ borderColor: primary + '33', backgroundColor: bg }}>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: primary + '22' }}>
+            <svg className="h-6 w-6" style={{ color: primary }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium" style={{ color: textColor }}>{url}</p>
+            <p className="truncate text-xs" style={{ color: mutedColor }}>{section.title}</p>
+          </div>
         </div>
       </div>
     </section>
