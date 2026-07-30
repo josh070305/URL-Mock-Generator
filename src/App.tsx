@@ -208,7 +208,7 @@ function BrowserMock({ page, project, device }: { page: MockPage; project: MockP
   const commerce = project.kind === "commerce";
   const dark = github;
   const bg = dark ? "#0d1117" : "#ffffff";
-  const ink = dark ? "#f0f6fc" : "#172033";
+  const ink = dark ? "#e6edf3" : "#172033";
   const muted = dark ? "#8b949e" : "#657084";
   const line = dark ? "#30363d" : "#e5e7eb";
   const accent = project.tokens[2].value;
@@ -224,41 +224,41 @@ function BrowserMock({ page, project, device }: { page: MockPage; project: MockP
         <span className="hidden sm:block">... </span>
       </div>
       <div className="mock-site-nav" style={{ borderColor: line }}>
-        <strong className="text-sm" style={{ color: ink }}>{github ? "GitHub" : project.name}</strong>
-        {!compact && <div className="flex gap-4 text-xs" style={{ color: muted }}>{nav.map((item) => <span key={item}>{item}</span>)}</div>}
-        <button className="mock-signin" style={{ borderColor: line, color: ink }}>Sign in</button>
+        <strong className="text-sm" style={{ color: ink, fontWeight: 700 }}>{github ? "GitHub" : project.name}</strong>
+        {!compact && <div className="flex gap-4 text-xs" style={{ color: muted, fontWeight: 600 }}>{nav.map((item) => <span key={item} style={{ fontWeight: 600 }}>{item}</span>)}</div>}
+        <button className="mock-signin" style={{ borderColor: line, color: ink, fontWeight: 700 }}>Sign in</button>
       </div>
 
       {page.layout === "landing" && (
         <section className="mock-landing">
-          <p className="mock-eyebrow" style={{ color: accent }}>BUILT FOR MOMENTUM</p>
-          <h3 style={{ color: ink }}>{github ? "Build, ship, and collaborate." : commerce ? "Objects for a considered everyday." : "Bring the work that matters into focus."}</h3>
-          <p style={{ color: muted }}>{project.summary.slice(0, 112)}</p>
-          <div className="flex gap-2"><button className="mock-primary" style={{ background: accent }}>Get started</button><button className="mock-secondary" style={{ borderColor: line, color: ink }}>Explore product</button></div>
+          <p className="mock-eyebrow" style={{ color: accent, fontWeight: 800 }}>BUILT FOR MOMENTUM</p>
+          <h3 style={{ color: ink, fontWeight: 800 }}>{github ? "Build, ship, and collaborate." : commerce ? "Objects for a considered everyday." : "Bring the work that matters into focus."}</h3>
+          <p style={{ color: muted, fontWeight: 600 }}>{project.summary.slice(0, 112)}</p>
+          <div className="flex gap-2"><button className="mock-primary" style={{ background: accent, fontWeight: 700 }}>Get started</button><button className="mock-secondary" style={{ borderColor: line, color: ink, fontWeight: 600 }}>Explore product</button></div>
           <div className="mock-hero-grid" style={{ borderColor: line }}>
-            {["Plan", "Create", "Measure"].map((label, index) => <div key={label} style={{ borderColor: line }}><span style={{ color: accent }}>0{index + 1}</span><strong>{label}</strong><small style={{ color: muted }}>A focused system for high-signal work.</small></div>)}
+            {["Plan", "Create", "Measure"].map((label, index) => <div key={label} style={{ borderColor: line }}><span style={{ color: accent, fontWeight: 800 }}>0{index + 1}</span><strong style={{ fontWeight: 700 }}>{label}</strong><small style={{ color: muted, fontWeight: 600 }}>A focused system for high-signal work.</small></div>)}
           </div>
         </section>
       )}
 
       {page.layout === "repository" && (
         <section className="mock-content">
-          <div className="mock-breadcrumb" style={{ color: accent }}><span>{github ? "openai" : project.name.toLowerCase()}</span> / <b>{github ? "openai-cookbook" : page.name.toLowerCase().replace(/ /g, "-")}</b></div>
-          <div className="mock-tabs" style={{ borderColor: line }}>{["Code", "Issues", "Pull requests", "Actions"].map((item, index) => <span key={item} style={{ color: index === 0 ? ink : muted, borderColor: index === 0 ? accent : "transparent" }}>{item}</span>)}</div>
-          <div className="mock-repo-grid"><div className="mock-file-list" style={{ borderColor: line }}>{cards.map((item, index) => <div key={item} style={{ borderColor: line }}><span style={{ color: accent }}>{index % 2 === 0 ? "#" : "<>"}</span><b>{item}</b><small style={{ color: muted }}>{index === 0 ? "Update project guidance" : "Refine source files"}</small></div>)}</div><aside style={{ borderColor: line }}><b>About</b><p style={{ color: muted }}>High-fidelity static mock generated from the discovered application structure.</p><div className="flex flex-wrap gap-1">{["typescript", "api", "ai"].map((tag) => <span className="mock-tag" key={tag}>{tag}</span>)}</div></aside></div>
+          <div className="mock-breadcrumb" style={{ color: accent, fontWeight: 700 }}><span style={{ fontWeight: 600 }}>{github ? "openai" : project.name.toLowerCase()}</span> / <b style={{ fontWeight: 800 }}>{github ? "openai-cookbook" : page.name.toLowerCase().replace(/ /g, "-")}</b></div>
+          <div className="mock-tabs" style={{ borderColor: line }}>{["Code", "Issues", "Pull requests", "Actions"].map((item, index) => <span key={item} style={{ color: index === 0 ? ink : muted, fontWeight: 700, borderColor: index === 0 ? accent : "transparent" }}>{item}</span>)}</div>
+          <div className="mock-repo-grid"><div className="mock-file-list" style={{ borderColor: line }}>{cards.map((item, index) => <div key={item} style={{ borderColor: line }}><span style={{ color: accent, fontWeight: 700 }}>{index % 2 === 0 ? "#" : "<>"}</span><b style={{ fontWeight: 800 }}>{item}</b><small style={{ color: muted, fontWeight: 600 }}>{index === 0 ? "Update project guidance" : "Refine source files"}</small></div>)}</div><aside style={{ borderColor: line }}><b style={{ fontWeight: 800 }}>About</b><p style={{ color: muted, fontWeight: 600 }}>High-fidelity static mock generated from the discovered application structure.</p><div className="flex flex-wrap gap-1">{["typescript", "api", "ai"].map((tag) => <span className="mock-tag" key={tag}>{tag}</span>)}</div></aside></div>
         </section>
       )}
 
       {page.layout === "listing" && (
-        <section className="mock-content"><div className="flex items-end justify-between"><div><p className="mock-eyebrow" style={{ color: accent }}>DISCOVER</p><h3 style={{ color: ink }}>{page.name}</h3></div><button className="mock-secondary" style={{ borderColor: line, color: ink }}>Filter</button></div><div className="mock-listing-grid">{cards.map((item, index) => <article key={item} style={{ borderColor: line }}><div className="mock-image" style={{ background: index % 2 ? "#dbeafe" : dark ? "#21262d" : "#e9e7e2" }}><span>{commerce ? "Image" : `0${index + 1}`}</span></div><b>{item}</b><small style={{ color: muted }}>{commerce ? "$128.00" : "Updated 2 hours ago"}</small><p style={{ color: muted }}>{commerce ? "A precise essential, made to be used." : "Clear context, ownership, and next action."}</p></article>)}</div></section>
+        <section className="mock-content"><div className="flex items-end justify-between"><div><p className="mock-eyebrow" style={{ color: accent, fontWeight: 800 }}>DISCOVER</p><h3 style={{ color: ink, fontWeight: 800 }}>{page.name}</h3></div><button className="mock-secondary" style={{ borderColor: line, color: ink, fontWeight: 600 }}>Filter</button></div><div className="mock-listing-grid">{cards.map((item, index) => <article key={item} style={{ borderColor: line }}><div className="mock-image" style={{ background: index % 2 ? "#dbeafe" : dark ? "#21262d" : "#e9e7e2" }}><span style={{ fontWeight: 600 }}>{commerce ? "Image" : `0${index + 1}`}</span></div><b style={{ fontWeight: 800 }}>{item}</b><small style={{ color: muted, fontWeight: 600 }}>{commerce ? "$128.00" : "Updated 2 hours ago"}</small><p style={{ color: muted, fontWeight: 600 }}>{commerce ? "A precise essential, made to be used." : "Clear context, ownership, and next action."}</p></article>)}</div></section>
       )}
 
       {page.layout === "dashboard" && (
-        <section className="mock-workspace"><aside className="mock-app-side" style={{ borderColor: line }}><b>{project.name}</b>{["Overview", "Activity", "Reports", "Settings"].map((item, index) => <span key={item} style={{ background: index === 0 ? (dark ? "#21262d" : "#eef2ff") : "transparent", color: index === 0 ? ink : muted }}>{item}</span>)}</aside><div className="mock-dashboard"><div><p className="mock-eyebrow" style={{ color: accent }}>WORKSPACE</p><h3 style={{ color: ink }}>{page.name}</h3></div><div className="mock-metrics">{["Active work", "Completion", "Response time"].map((item, index) => <div key={item} style={{ borderColor: line }}><small style={{ color: muted }}>{item}</small><strong>{["24", "78%", "2.4h"][index]}</strong><span style={{ color: "#059669" }}>+{["12", "8", "18"][index]}%</span></div>)}</div><div className="mock-chart" style={{ borderColor: line }}><div className="flex justify-between"><b>Weekly activity</b><small style={{ color: muted }}>Last 7 days</small></div><div className="mock-bars">{[42, 60, 36, 74, 58, 88, 70].map((height, index) => <span key={index} style={{ height: `${height}%`, background: index === 5 ? accent : dark ? "#30363d" : "#dbe3f1" }} />)}</div></div></div></section>
+        <section className="mock-workspace"><aside className="mock-app-side" style={{ borderColor: line }}><b style={{ fontWeight: 800 }}>{project.name}</b>{["Overview", "Activity", "Reports", "Settings"].map((item, index) => <span key={item} style={{ background: index === 0 ? (dark ? "#21262d" : "#eef2ff") : "transparent", color: index === 0 ? ink : muted, fontWeight: 600 }}>{item}</span>)}</aside><div className="mock-dashboard"><div><p className="mock-eyebrow" style={{ color: accent, fontWeight: 800 }}>WORKSPACE</p><h3 style={{ color: ink, fontWeight: 800 }}>{page.name}</h3></div><div className="mock-metrics">{["Active work", "Completion", "Response time"].map((item, index) => <div key={item} style={{ borderColor: line }}><small style={{ color: muted, fontWeight: 600 }}>{item}</small><strong style={{ fontWeight: 800, color: ink }}>{["24", "78%", "2.4h"][index]}</strong><span style={{ color: "#059669", fontWeight: 700 }}>+{["12", "8", "18"][index]}%</span></div>)}</div><div className="mock-chart" style={{ borderColor: line }}><div className="flex justify-between"><b style={{ fontWeight: 800, color: ink }}>Weekly activity</b><small style={{ color: muted, fontWeight: 600 }}>Last 7 days</small></div><div className="mock-bars">{[42, 60, 36, 74, 58, 88, 70].map((height, index) => <span key={index} style={{ height: `${height}%`, background: index === 5 ? accent : dark ? "#30363d" : "#dbe3f1" }} />)}</div></div></div></section>
       )}
 
       {page.layout === "article" && (
-        <section className="mock-article"><aside style={{ borderColor: line }}><b>On this page</b>{["Overview", "Install", "Configure", "Next steps"].map((item, index) => <span key={item} style={{ color: index === 0 ? accent : muted }}>{item}</span>)}</aside><article><p className="mock-eyebrow" style={{ color: accent }}>GUIDE</p><h3 style={{ color: ink }}>{page.name}</h3><p style={{ color: muted }}>A clear, deliberate page hierarchy designed for scanning, orientation, and confident completion of the next step.</p><div className="mock-code" style={{ background: dark ? "#161b22" : "#101827", color: "#d1fae5" }}><span>// Start with a focused configuration</span><br /><b>const</b> project = createMock({'{'} source, evidence {'}'});</div><h4 style={{ color: ink }}>A simple path forward</h4><p style={{ color: muted }}>Content is grouped into readable sections with supporting detail close to the action it explains.</p></article></section>
+        <section className="mock-article"><aside style={{ borderColor: line }}><b style={{ fontWeight: 800 }}>On this page</b>{["Overview", "Install", "Configure", "Next steps"].map((item, index) => <span key={item} style={{ color: index === 0 ? accent : muted, fontWeight: 600 }}>{item}</span>)}</aside><article><p className="mock-eyebrow" style={{ color: accent, fontWeight: 800 }}>GUIDE</p><h3 style={{ color: ink, fontWeight: 800 }}>{page.name}</h3><p style={{ color: muted, fontWeight: 600 }}>A clear, deliberate page hierarchy designed for scanning, orientation, and confident completion of the next step.</p><div className="mock-code" style={{ background: dark ? "#161b22" : "#101827", color: "#d1fae5", fontWeight: 600 }}><span style={{ fontWeight: 600 }}>// Start with a focused configuration</span><br /><b style={{ fontWeight: 800 }}>const</b> project = createMock({'{'} source, evidence {'}'});</div><h4 style={{ color: ink, fontWeight: 700 }}>A simple path forward</h4><p style={{ color: muted, fontWeight: 600 }}>Content is grouped into readable sections with supporting detail close to the action it explains.</p></article></section>
       )}
     </div>
   );
